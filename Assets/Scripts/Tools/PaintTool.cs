@@ -26,7 +26,7 @@ public class PaintTool
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
     }
 
-    ~PaintTool()
+    public void Reset()
     {
         GameObject.DestroyImmediate(_selectedPrefab);
     }
