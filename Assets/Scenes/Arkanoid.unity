@@ -228,8 +228,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   LevelData: {fileID: 11400000, guid: 4be84f7a418bbdd4bac6b58b1169b087, type: 2}
-  bricks: 0
-  lifes: 0
 --- !u!4 &388386710
 Transform:
   m_ObjectHideFlags: 0
@@ -237,7 +235,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 388386708}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.99, y: 5.02, z: 0.09765625}
+  m_LocalPosition: {x: -4.99, y: 5.02, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -290,7 +288,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 39.2
-  orthographic: 0
+  orthographic: 1
   orthographic size: 5
   m_Depth: -1
   m_CullingMask:

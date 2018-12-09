@@ -1,63 +1,124 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class PaintTool : LevelEditorTool
+public class PaintTool
 {
-
     private const string BRICKS_PATH = "Assets/Prefabs/Bricks";
 
+    private LevelManager _levelManager;
+    private Vector3 _offSetPosition;
+
     private Vector3 _paleteWindowPosition;
+    private int _selectedPrefabIndex = -1;
+    private int _currentPrefabIndex = -1;
+    private float _prefabPreviewWidth = 100f;
+    private float _prefabPreviewHeight = 100f;
+
+
     private List<GameObject> _bricksPrefabs = new List<GameObject>();
     private GameObject _selectedPrefab;
 
-
-    protected override void Init(LevelManager levelmanager)
+    public PaintTool(LevelManager levelManager)
     {
-        base.Init(levelmanager);
+        _levelManager = levelManager;
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
     }
 
-    protected override void DrawTool()
+    ~PaintTool()
     {
+        GameObject.DestroyImmediate(_selectedPrefab);
+    }
+
+    public void UpdateTool()
+    {
+        DrawGrid();
         Handles.BeginGUI();
-        GUILayout.Window(0, new Rect(50f, 100f, 200f, 360f), DrawPrefabPreviewWindow, "Level Editor");
-        Handles.EndGUI();        
+        GUILayout.Window(0, new Rect(50f, 100f, 225f, 360f), DrawPrefabPreviewWindow, "Level Editor");
+        Handles.EndGUI();
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
     }
 
-    protected override void OnMouseDown(Vector3 mousePosition)
+    public void OnMouseMove(Vector3 mousePosition)
     {
-        throw new System.NotImplementedException();
+        if (Selection.activeTransform == _levelManager.transform)
+        {
+            if (_selectedPrefab != null)
+            {
+                _selectedPrefab.transform.position = WorldPositionToGrid(MousePositionToWorldPosition(mousePosition));
+            }
+        }
     }
 
-    protected override void OnMouseMove(Vector3 mousePosition)
+    public void OnMouseDown(Vector3 mousePosition)
     {
-        throw new System.NotImplementedException();
+        CreateBrick(_selectedPrefab, WorldPositionToGrid(MousePositionToWorldPosition(mousePosition)));
     }
 
-    protected override void OnMouseUp()
+    private Vector3 MousePositionToWorldPosition(Vector3 mousePosition)
     {
-        throw new System.NotImplementedException();
+        Camera camera = SceneView.currentDrawingSceneView.camera;
+        mousePosition.y = camera.pixelHeight - mousePosition.y;
+        return camera.ScreenToWorldPoint(mousePosition);
     }
 
-    protected override void UpdateTool()
+    private Vector3 WorldPositionToGrid(Vector3 worldPosition)
     {
-        throw new System.NotImplementedException();
+        int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / _levelManager.LevelData.BrickWidth, 0, _levelManager.LevelData.LevelWidth - 1));
+        int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / _levelManager.LevelData.BrickHeight, 0, _levelManager.LevelData.LevelHeight - 1));
+
+        Vector3 pos = new Vector3
+        {
+            x = _levelManager.transform.position.x + (x * _levelManager.LevelData.BrickWidth + _levelManager.LevelData.BrickWidth / 2.0f),
+            y = _levelManager.transform.position.y - (y * _levelManager.LevelData.BrickHeight + _levelManager.LevelData.BrickHeight / 2.0f)
+        };
+
+        return pos;
+    }
+
+    private void DrawGrid()
+    {
+        _offSetPosition = new Vector3(_levelManager.transform.position.x + _levelManager.LevelData.BrickWidth / 2, _levelManager.transform.position.y - _levelManager.LevelData.BrickHeight / 2);
+        for (int x = 0; x < _levelManager.LevelData.LevelWidth; x++)
+        {
+            for (int y = 0; y < _levelManager.LevelData.LevelHeight; y++)
+            {
+                Vector3 pos = new Vector3(_offSetPosition.x + x * _levelManager.LevelData.BrickWidth, _offSetPosition.y - y * _levelManager.LevelData.BrickHeight);
+                ToolsUtils.DrawRectangle(pos, _levelManager.LevelData.BrickWidth, _levelManager.LevelData.BrickHeight, Color.clear, Color.white);
+            }
+        }
     }
 
     private void DrawPrefabPreviewWindow(int windowID)
     {
         _paleteWindowPosition = GUILayout.BeginScrollView(_paleteWindowPosition);
-        int selectionIndex = -1;
-        selectionIndex = GUILayout.SelectionGrid(
-            selectionIndex,
+        _selectedPrefabIndex = GUILayout.SelectionGrid(
+            _selectedPrefabIndex,
             GetGUIContentsFromPrefabs(_bricksPrefabs),
             2,
             GetGUIStyle()
             );
         GUILayout.EndScrollView();
-        GetSelectedItem(selectionIndex, _bricksPrefabs);
+        GetSelectedItem(_selectedPrefabIndex);
+    }
+
+    private void GetSelectedItem(int index)
+    {
+        if (index != -1 && _currentPrefabIndex != index)
+        {
+            _currentPrefabIndex = index;
+            GameObject.DestroyImmediate(_selectedPrefab);
+            _selectedPrefab = PrefabUtility.InstantiatePrefab(_bricksPrefabs[index]) as GameObject;
+            _selectedPrefab.transform.parent = _levelManager.transform;
+        }
+    }
+
+    private void CreateBrick(GameObject brick, Vector3 position)
+    {
+        GameObject go = GameObject.Instantiate(brick);
+        go.transform.parent = _levelManager.transform;
+        go.transform.position = position;
     }
 
     private GUIContent[] GetGUIContentsFromPrefabs(List<GameObject> prefabs)
@@ -79,21 +140,13 @@ public class PaintTool : LevelEditorTool
 
     private GUIStyle GetGUIStyle()
     {
-        GUIStyle guiStyle = new GUIStyle(GUI.skin.button);
-        guiStyle.imagePosition = ImagePosition.ImageOnly;
-        guiStyle.alignment = TextAnchor.MiddleCenter;
-        guiStyle.fixedWidth = _prefabPreviewWidth;
-        guiStyle.fixedHeight = _prefabPreviewHeight;
-        return guiStyle;
-    }
-
-    private void GetSelectedItem(int index, List<GameObject> prefabs)
-    {
-        if (index != -1)
+        GUIStyle guiStyle = new GUIStyle(GUI.skin.button)
         {
-            GameObject.DestroyImmediate(_selectedPrefab);
-            _selectedPrefab = PrefabUtility.InstantiatePrefab(prefabs[index]) as GameObject;
-            _selectedPrefab.transform.parent = _levelManager.transform;
-        }
+            imagePosition = ImagePosition.ImageAbove,
+            alignment = TextAnchor.UpperCenter,
+            fixedWidth = _prefabPreviewWidth,
+            fixedHeight = _prefabPreviewHeight
+        };
+        return guiStyle;
     }
 }
