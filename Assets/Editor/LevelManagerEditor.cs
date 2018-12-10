@@ -4,30 +4,27 @@ using UnityEngine;
 
 [CustomEditor(typeof(LevelManager))]
 public class LevelManagerEditor : Editor
-{
-    // REFACTOR - On Going
+{    
     // MODE EDIT
     //  - Paint mode
     //  - Set background music mode
     //  - Set PowerUps
     // MOVE LOGIC TO SCRIPT PAINT BRUSH REPENSARLO
-    //  - CHECK IF OBJECT AT POSITION
-    // DRAW GRID
+    //  - CHECK IF OBJECT AT POSITION    
 
     bool edit = false;
-
     private LevelManager _target;
-    private PaintTool _paintTool;
+    private PaintTool _paintTool;    
 
     private void OnEnable()
-    {
+    {        
         _target = (LevelManager)target;
         _paintTool = new PaintTool(_target);
     }
 
     private void OnDisable()
-    {        
-        SceneView.onSceneGUIDelegate -= HandleMouseEvents;        
+    {
+        SceneView.onSceneGUIDelegate -= HandleMouseEvents;
     }
 
     public override void OnInspectorGUI()
@@ -39,10 +36,8 @@ public class LevelManagerEditor : Editor
             if (GUILayout.Button("Save"))
             {
                 edit = false;
-                //HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Keyboard));
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
-                // TODO SAVE IN SCRIPTABLE OBJECT
                 Debug.Log("Save in ScriptableObject");
             }
         }
@@ -56,7 +51,6 @@ public class LevelManagerEditor : Editor
                 SceneView.RepaintAll();
             }
         }
-
     }
 
     private void OnSceneGUI()
