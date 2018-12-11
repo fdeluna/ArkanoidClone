@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+[Serializable]
 public class PaintTool
 {
     private const string BRICKS_PATH = "Assets/Prefabs/Bricks";
@@ -16,22 +17,22 @@ public class PaintTool
     private float _prefabPreviewWidth = 100f;
     private float _prefabPreviewHeight = 100f;
 
-
     private List<GameObject> _bricksPrefabs;
     private GameObject _selectedPrefab;
-    private GameObject[,] _gridBricks;
-
 
     public PaintTool(LevelManager levelManager)
     {
         _levelManager = levelManager;
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
-        _gridBricks = new GameObject[_levelManager.LevelData.LevelWidth, _levelManager.LevelData.LevelHeight];
+
+        _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
+        GetSelectedItem(_selectedPrefabIndex);
     }
 
     public void Reset()
     {
         GameObject.DestroyImmediate(_selectedPrefab);
+        EditorPrefs.SetInt("_selectedPrefabIndex", _selectedPrefabIndex);
     }
 
     public void UpdateTool()
@@ -69,23 +70,25 @@ public class PaintTool
 
     public void OnMouseDown(Vector3 mousePosition)
     {
-        CreateBrick(_selectedPrefab, MousePositionToWorldPosition(mousePosition));
+        if (_selectedPrefab != null)
+        {
+            CreateBrick(_selectedPrefab, mousePosition);
+        }
     }
 
-    private void CreateBrick(GameObject brick, Vector3 position)
+    private void CreateBrick(GameObject brick, Vector3 mousePosition)
     {
-        Vector2 gridPosition = WorldPositionToGrid(position);
-
-        if (_gridBricks[(int)gridPosition.x, (int)gridPosition.y] != null)
+        Camera camera = SceneView.currentDrawingSceneView.camera;
+        Ray r = camera.ScreenPointToRay(new Vector3(mousePosition.x, camera.pixelHeight - mousePosition.y));
+        RaycastHit hit;
+        if (Physics.Raycast(r, out hit, Mathf.Infinity))
         {
-            GameObject.DestroyImmediate(_gridBricks[(int)gridPosition.x, (int)gridPosition.y]);
-            _gridBricks[(int)gridPosition.x, (int)gridPosition.y] = null;
+            GameObject.DestroyImmediate(hit.transform.gameObject);
         }
 
-        GameObject go = GameObject.Instantiate(brick);
+        GameObject go = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
         go.transform.parent = _levelManager.transform;
-        go.transform.position = position;
-        _gridBricks[(int)gridPosition.x, (int)gridPosition.y] = go;
+        go.transform.position = MousePositionToWorldPosition(mousePosition);
     }
 
     private Vector3 MousePositionToWorldPosition(Vector3 mousePosition)
@@ -93,7 +96,6 @@ public class PaintTool
         Camera camera = SceneView.currentDrawingSceneView.camera;
         mousePosition.y = camera.pixelHeight - mousePosition.y;
         Vector2 gridPosition = WorldPositionToGrid(camera.ScreenToWorldPoint(mousePosition));
-
         return GridToWorldPosition(gridPosition);
     }
 
@@ -116,8 +118,6 @@ public class PaintTool
         return pos;
     }
 
-
-
     private void DrawPrefabPreviewWindow(int windowID)
     {
         _paleteWindowPosition = GUILayout.BeginScrollView(_paleteWindowPosition);
@@ -139,6 +139,8 @@ public class PaintTool
             GameObject.DestroyImmediate(_selectedPrefab);
             _selectedPrefab = PrefabUtility.InstantiatePrefab(_bricksPrefabs[index]) as GameObject;
             _selectedPrefab.transform.parent = _levelManager.transform;
+            _selectedPrefab.hideFlags = HideFlags.HideInHierarchy;
+            _selectedPrefab.layer = LayerMask.NameToLayer("Ignore Raycast");
         }
     }
 
@@ -149,9 +151,11 @@ public class PaintTool
         {
             foreach (GameObject prefab in prefabs)
             {
-                GUIContent guiContent = new GUIContent();
-                guiContent.text = prefab.name;
-                guiContent.image = AssetPreview.GetAssetPreview(prefab);
+                GUIContent guiContent = new GUIContent
+                {
+                    text = prefab.name,
+                    image = AssetPreview.GetAssetPreview(prefab)
+                };
                 guiContents.Add(guiContent);
             }
         }
