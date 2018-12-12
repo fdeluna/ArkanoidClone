@@ -8,6 +8,21 @@ public class PaintTool
 {
     private const string BRICKS_PATH = "Assets/Prefabs/Bricks";
 
+    private bool EraseMode
+    {
+        get {
+
+            _eraseMode = Event.current.control;
+
+            if (_selectedPrefab != null)
+            {
+                _selectedPrefab.SetActive(!_eraseMode);
+            }
+            return _eraseMode;
+        }       
+    }
+    private bool _eraseMode = false;
+
     private LevelManager _levelManager;
     private Vector3 _offSetPosition;
 
@@ -37,11 +52,12 @@ public class PaintTool
 
     public void UpdateTool()
     {
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
+
         DrawGrid();
         Handles.BeginGUI();
         GUILayout.Window(0, new Rect(50f, 100f, 225f, 360f), DrawPrefabPreviewWindow, "Level Editor");
         Handles.EndGUI();
-        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
     }
 
     private void DrawGrid()
@@ -60,35 +76,68 @@ public class PaintTool
     public void OnMouseMove(Vector3 mousePosition)
     {
         if (Selection.activeTransform == _levelManager.transform)
-        {
-            if (_selectedPrefab != null)
-            {
-                _selectedPrefab.transform.position = MousePositionToWorldPosition(mousePosition);
+        {            
+            Vector3 worldPosition = MousePositionToWorldPosition(mousePosition);
+            if (EraseMode)
+            {                
+                ToolsUtils.DrawRectangle(worldPosition, _levelManager.LevelData.BrickWidth, _levelManager.LevelData.BrickHeight, new Color32(255, 77, 77, 70), Color.black);
+            }
+            else if (_selectedPrefab != null)
+            {                
+                _selectedPrefab.transform.position = worldPosition;
             }
         }
     }
 
     public void OnMouseDown(Vector3 mousePosition)
     {
-        if (_selectedPrefab != null)
+        if (EraseMode)
         {
-            CreateBrick(_selectedPrefab, mousePosition);
+            DeleteBrickAtPosition(mousePosition);
+        }
+        else if (_selectedPrefab != null)
+        {
+            CreateBrickAtPosition(mousePosition);
         }
     }
 
-    private void CreateBrick(GameObject brick, Vector3 mousePosition)
+    private void DeleteBrickAtPosition(Vector3 mousePosition)
     {
+        GameObject brickAtPosition = GetSceneBrick(mousePosition);
+
+        if (brickAtPosition != null)
+        {
+            GameObject.DestroyImmediate(brickAtPosition);
+        }
+    }
+
+
+    private void CreateBrickAtPosition(Vector3 mousePosition)
+    {
+        GameObject brickAtPosition = GetSceneBrick(mousePosition);
+
+        if (brickAtPosition != null)
+        {
+            GameObject.DestroyImmediate(brickAtPosition);
+        }
+
+        brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
+        brickAtPosition.transform.parent = _levelManager.transform;
+        brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
+    }
+
+    private GameObject GetSceneBrick(Vector3 position)
+    {
+        GameObject brick = null;
         Camera camera = SceneView.currentDrawingSceneView.camera;
-        Ray r = camera.ScreenPointToRay(new Vector3(mousePosition.x, camera.pixelHeight - mousePosition.y));
+        Ray r = camera.ScreenPointToRay(new Vector3(position.x, camera.pixelHeight - position.y));
         RaycastHit hit;
         if (Physics.Raycast(r, out hit, Mathf.Infinity))
         {
-            GameObject.DestroyImmediate(hit.transform.gameObject);
+            brick = hit.transform.gameObject;
         }
 
-        GameObject go = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
-        go.transform.parent = _levelManager.transform;
-        go.transform.position = MousePositionToWorldPosition(mousePosition);
+        return brick;
     }
 
     private Vector3 MousePositionToWorldPosition(Vector3 mousePosition)

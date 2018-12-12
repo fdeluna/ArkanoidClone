@@ -56,6 +56,7 @@ public class LevelManagerEditor : Editor
             if (GUILayout.Button("Edit"))
             {
                 edit = true;
+                _paintTool.Reset();
                 Tools.current = Tool.None;
                 SceneView.onSceneGUIDelegate += HandleMouseEvents;
                 SceneView.RepaintAll();
@@ -80,7 +81,7 @@ public class LevelManagerEditor : Editor
 
         _paintTool.OnMouseMove(e.mousePosition);
 
-        if (e.type == EventType.MouseDown || e.type == EventType.MouseDrag)
+        if (e.button == 0 && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag))
         {
             _paintTool.OnMouseDown(e.mousePosition);
         }
