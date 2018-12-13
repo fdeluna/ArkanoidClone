@@ -77,7 +77,8 @@ public class LevelManagerEditor : Editor
     void HandleMouseEvents(SceneView sceneView)
     {
         // LOOK AT BACKGROUND
-        sceneView.LookAt(_target.Background.position);
+        // TODO FIX THIS
+        //sceneView.LookAt(_target.Background.position);       
         sceneView.in2DMode = true;
         Event e = Event.current;
 
