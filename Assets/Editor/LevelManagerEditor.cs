@@ -15,11 +15,11 @@ public class LevelManagerEditor : Editor
     bool edit = false;
     private LevelManager _target;
     private PaintTool _paintTool;
-
+    
     private void Awake()
     {
         _target = (LevelManager)target;
-        _paintTool = new PaintTool(_target);
+        _paintTool = new PaintTool(_target);        
     }
 
     private void OnEnable()
@@ -45,6 +45,7 @@ public class LevelManagerEditor : Editor
             if (GUILayout.Button("Save"))
             {
                 edit = false;
+                EditorPrefs.DeleteAll();
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
@@ -76,7 +77,8 @@ public class LevelManagerEditor : Editor
     void HandleMouseEvents(SceneView sceneView)
     {
         // LOOK AT BACKGROUND
-        //sceneView.LookAt(_target.transform.position);
+        sceneView.LookAt(_target.Background.position);
+        sceneView.in2DMode = true;
         Event e = Event.current;
 
         _paintTool.OnMouseMove(e.mousePosition);

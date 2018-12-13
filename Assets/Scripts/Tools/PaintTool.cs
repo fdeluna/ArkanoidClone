@@ -7,7 +7,7 @@ using UnityEngine;
 public class PaintTool
 {
     private const string BRICKS_PATH = "Assets/Prefabs/Bricks";
-
+    
     private bool EraseMode
     {
         get {
@@ -23,15 +23,17 @@ public class PaintTool
     }
     private bool _eraseMode = false;
 
-    private LevelManager _levelManager;
+    private LevelManager _levelManager;    
+
+    // Grid offset
     private Vector3 _offSetPosition;
 
+    // Level editor window
     private Vector3 _paleteWindowPosition;
     private int _selectedPrefabIndex = -1;
     private int _currentPrefabIndex = -1;
     private float _prefabPreviewWidth = 100f;
     private float _prefabPreviewHeight = 100f;
-
     private List<GameObject> _bricksPrefabs;
     private GameObject _selectedPrefab;
 
@@ -39,9 +41,7 @@ public class PaintTool
     {
         _levelManager = levelManager;
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
-
-        _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
-        GetSelectedItem(_selectedPrefabIndex);
+        _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);        
     }
 
     public void Reset()
@@ -122,7 +122,7 @@ public class PaintTool
         }
 
         brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
-        brickAtPosition.transform.parent = _levelManager.transform;
+        brickAtPosition.transform.parent = _levelManager.Bricks;
         brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
     }
 
