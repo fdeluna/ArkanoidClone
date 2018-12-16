@@ -7,10 +7,11 @@ using UnityEngine;
 public class PaintTool
 {
     private const string BRICKS_PATH = "Assets/Prefabs/Bricks";
-    
+
     private bool EraseMode
     {
-        get {
+        get
+        {
 
             _eraseMode = Event.current.control;
 
@@ -19,11 +20,11 @@ public class PaintTool
                 _selectedPrefab.SetActive(!_eraseMode);
             }
             return _eraseMode;
-        }       
+        }
     }
     private bool _eraseMode = false;
 
-    private LevelManager _levelManager;    
+    private LevelManager _levelManager;
 
     // Grid offset
     private Vector3 _offSetPosition;
@@ -41,13 +42,14 @@ public class PaintTool
     {
         _levelManager = levelManager;
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
-        _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);        
+        _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
     }
 
     public void Reset()
     {
         GameObject.DestroyImmediate(_selectedPrefab);
-        EditorPrefs.SetInt("_selectedPrefabIndex", _selectedPrefabIndex);
+        EditorPrefs.DeleteKey("_selectedPrefabIndex");
+        _selectedPrefabIndex = -1;
     }
 
     public void UpdateTool()
@@ -76,14 +78,14 @@ public class PaintTool
     public void OnMouseMove(Vector3 mousePosition)
     {
         if (Selection.activeTransform == _levelManager.transform)
-        {            
+        {
             Vector3 worldPosition = MousePositionToWorldPosition(mousePosition);
             if (EraseMode)
-            {                
+            {
                 ToolsUtils.DrawRectangle(worldPosition, _levelManager.LevelData.BrickWidth, _levelManager.LevelData.BrickHeight, new Color32(255, 77, 77, 70), Color.black);
             }
             else if (_selectedPrefab != null)
-            {                
+            {
                 _selectedPrefab.transform.position = worldPosition;
             }
         }
@@ -104,34 +106,33 @@ public class PaintTool
     private void DeleteBrickAtPosition(Vector3 mousePosition)
     {
         GameObject brickAtPosition = GetSceneBrick(mousePosition);
-        
+
         if (brickAtPosition != null)
-        {            
-            GameObject.DestroyImmediate(brickAtPosition);            
+        {
+            GameObject.DestroyImmediate(brickAtPosition);
         }
     }
 
     private void CreateBrickAtPosition(Vector3 mousePosition)
     {
         DeleteBrickAtPosition(mousePosition);
-        Debug.Log("Create");
+        Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
         GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
         brickAtPosition.transform.parent = _levelManager.Bricks;
         brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
+        _levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
     }
-    
+
     private GameObject GetSceneBrick(Vector3 position)
     {
         GameObject brick = null;
-        Camera camera = SceneView.currentDrawingSceneView.camera;
-        Ray r = camera.ScreenPointToRay(new Vector3(position.x, camera.pixelHeight - position.y));
-        Debug.Log("Ray");
-        if (Physics.Raycast(r, out RaycastHit hit,Mathf.Infinity))
-        {            
-            brick = hit.transform.gameObject;
-            Debug.Log("hit");
-        }
 
+        Vector2 gridPosition = MousePositionToGridPosition(position);
+
+        if (_levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
+        {
+            brick = _levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
+        }        
         return brick;
     }
 
@@ -141,6 +142,13 @@ public class PaintTool
         mousePosition.y = camera.pixelHeight - mousePosition.y;
         Vector2 gridPosition = WorldPositionToGrid(camera.ScreenToWorldPoint(mousePosition));
         return GridToWorldPosition(gridPosition);
+    }
+
+    private Vector2 MousePositionToGridPosition(Vector3 mousePosition)
+    {
+        Camera camera = SceneView.currentDrawingSceneView.camera;
+        mousePosition.y = camera.pixelHeight - mousePosition.y;
+        return WorldPositionToGrid(camera.ScreenToWorldPoint(mousePosition));
     }
 
     private Vector2 WorldPositionToGrid(Vector3 worldPosition)
@@ -172,6 +180,7 @@ public class PaintTool
             GetGUIStyle()
             );
         GUILayout.EndScrollView();
+        EditorPrefs.SetInt("_selectedPrefabIndex", _selectedPrefabIndex);
         GetSelectedItem(_selectedPrefabIndex);
     }
 

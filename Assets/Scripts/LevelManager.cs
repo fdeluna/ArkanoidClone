@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[ExecuteInEditMode,DisallowMultipleComponent]
 public class LevelManager : MonoBehaviour
 {
     public LevelData LevelData;
@@ -28,13 +29,18 @@ public class LevelManager : MonoBehaviour
             return _bricks;
         }
     }
+
+    public GameObject[] LevelBricks;
+
     private Transform _bricks;
+
 
     // AQUI FALTA MAPEAR LAS VARIABLES DEL SCRIPTABLEoBJECT
 
     void Awake()
     {
-        CleanLevel();        
+        CleanLevel();
+        LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
     }
 
     private void Start()

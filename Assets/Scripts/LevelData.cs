@@ -13,19 +13,21 @@ public class LevelData : ScriptableObject
 
     public Sprite background;
     public AudioClip backgroundMusic;
-
     public LevelData nextLevel;
 
     private List<Transform> _bricks;
 
     // TODO SAVE PREFAB AND LIST MAP???
-    public void Save(Transform level)
+    public void Save(GameObject[] levelBricks)
     {
-        _bricks.Clear();
-        foreach (Transform t in level)
-        {
-            _bricks.Add(t);
-        }
+        //_bricks.Clear();
+        //foreach (Transform t in level)
+        //{
+        //    _bricks.Add(t);
+        //}
+
+
+
     }
 
     public void Load(LevelManager level)

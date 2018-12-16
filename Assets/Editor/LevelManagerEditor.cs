@@ -10,19 +10,19 @@ public class LevelManagerEditor : Editor
     // MOVE LOGIC TO SCRIPT PAINT BRUSH REPENSARLO
     //  - CHECK IF OBJECT AT POSITION    
 
-    bool edit = false;
+    private bool _edit = false;
     private LevelManager _target;
     private PaintTool _paintTool;
-    
+
     private void Awake()
     {
         _target = (LevelManager)target;
-        _paintTool = new PaintTool(_target);        
+        _paintTool = new PaintTool(_target);
     }
 
     private void OnEnable()
     {
-        edit = EditorPrefs.GetBool("edit", false);
+        _edit = EditorPrefs.GetBool("_edit", false);
         SceneView.onSceneGUIDelegate -= HandleMouseEvents;
         SceneView.onSceneGUIDelegate += HandleMouseEvents;
     }
@@ -30,7 +30,7 @@ public class LevelManagerEditor : Editor
     private void OnDisable()
     {
         SceneView.onSceneGUIDelegate -= HandleMouseEvents;
-        EditorPrefs.SetBool("edit", edit);
+        EditorPrefs.SetBool("_edit", _edit);
         _paintTool.Reset();
     }
 
@@ -38,23 +38,23 @@ public class LevelManagerEditor : Editor
     {
         DrawDefaultInspector();
 
-        if (edit)
+        if (_edit)
         {
             if (GUILayout.Button("Save"))
             {
-                edit = false;
-                EditorPrefs.DeleteAll();
+                _edit = false;
+                EditorPrefs.DeleteKey("edit");
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                _target.LevelData.Save(_target.Bricks);
+                _target.LevelData.Save(_target.LevelBricks);
             }
         }
         else
         {
             if (GUILayout.Button("Edit"))
             {
-                edit = true;
+                _edit = true;
                 _paintTool.Reset();
                 Tools.current = Tool.None;
                 SceneView.onSceneGUIDelegate += HandleMouseEvents;
@@ -65,7 +65,7 @@ public class LevelManagerEditor : Editor
 
     private void OnSceneGUI()
     {
-        if (edit)
+        if (_edit)
         {
             _paintTool.UpdateTool();
             SceneView.RepaintAll();
@@ -77,7 +77,7 @@ public class LevelManagerEditor : Editor
         // LOOK AT BACKGROUND
         // TODO FIX THIS
         //sceneView.LookAt(_target.Background.position);       
-        sceneView.in2DMode = true;        
+        sceneView.in2DMode = true;
         Event e = Event.current;
 
         _paintTool.OnMouseMove(e.mousePosition);
