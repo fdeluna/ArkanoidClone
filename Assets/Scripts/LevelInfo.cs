@@ -30,29 +30,11 @@ public class LevelInfo : MonoBehaviour
         }
     }
     private Transform _bricks;
-
-
-    [HideInInspector]
-    public GameObject[] LevelBricks
-    {
-        get
-        {
-            if (_levelBricks == null || _levelBricks.Length == 0)
-            {
-                _levelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
-            }
-            return _levelBricks;
-        }
-    }
-
-
-    private GameObject[] _levelBricks;
-
-    // AQUI FALTA MAPEAR LAS VARIABLES DEL SCRIPTABLEoBJECT
+    // AQUI FALTA MAPEAR LAS VARIABLES DEL SCRIPTABLEOBJECT
 
     void Awake()
     {
-        CleanLevel();        
+        CleanLevel();
     }
 
     private void Start()
@@ -60,16 +42,12 @@ public class LevelInfo : MonoBehaviour
         LevelData.Load(this);
     }
 
-    public void CleanLevel()
+    void CleanLevel()
     {
-        if (Bricks.childCount > 0)
+        foreach (Transform t in Bricks)
         {
-            foreach (Transform t in Bricks)
-            {
-                GameObject.DestroyImmediate(t.gameObject);
-            }
+            GameObject.Destroy(t.gameObject);
         }
-        _levelBricks = null;
     }
-    
+
 }

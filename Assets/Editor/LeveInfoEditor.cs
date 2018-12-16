@@ -39,12 +39,7 @@ public class LevelInfoEditor : Editor
         DrawDefaultInspector();
 
         if (_edit)
-        {
-            if (GUILayout.Button("Clear"))
-            {
-                _target.CleanLevel();
-            }
-
+        {            
             if (GUILayout.Button("Save"))
             {
                 _edit = false;
@@ -52,7 +47,7 @@ public class LevelInfoEditor : Editor
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                _target.LevelData.Save(_target.LevelBricks);
+                _target.LevelData.Save();
             }
         }
         else

@@ -16,6 +16,21 @@ public class LevelData : ScriptableObject
     public AudioClip backgroundMusic;
     public LevelData nextLevel;
 
+    // Current Data in Inspector
+    [HideInInspector]
+    public GameObject[] LevelBricks
+    {
+        get
+        {
+            if (_levelBricks == null || _levelBricks.Length == 0)
+            {
+                _levelBricks = new GameObject[LevelWidth * LevelHeight];
+            }
+            return _levelBricks;
+        }
+    }
+    private GameObject[] _levelBricks;
+
     private List<BrickPosition> _bricks;
 
     [Serializable]
@@ -24,18 +39,17 @@ public class LevelData : ScriptableObject
         public Vector3 Position;
         public string PrefabName;
     }
-
-    // TODO SAVE PREFAB AND LIST MAP???
-    public void Save(GameObject[] levelBricks)
+    
+    public void Save()
     {
         _bricks.Clear();
         for (int x = 0; x < LevelWidth; x++)
         {
             for (int y = 0; y < LevelHeight; y++)
             {
-                if (levelBricks[x + y * LevelWidth] != null)
+                if (LevelBricks[x + y * LevelWidth] != null)
                 {
-                    GameObject brick = levelBricks[x + y * LevelWidth];
+                    GameObject brick = LevelBricks[x + y * LevelWidth];
                     BrickPosition brickPosion = new BrickPosition
                     {
                         Position = brick.transform.position,

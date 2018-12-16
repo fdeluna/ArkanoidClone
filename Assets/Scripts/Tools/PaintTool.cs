@@ -56,6 +56,8 @@ public class PaintTool
     {
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
 
+        // REFACTOR DRAWGRID
+        // TODO REAPAINT LEVEL WHEN DATA CHANGED
         DrawGrid();
         Handles.BeginGUI();
         GUILayout.Window(0, new Rect(50f, 100f, 225f, 360f), DrawPrefabPreviewWindow, "Level Editor");
@@ -119,9 +121,8 @@ public class PaintTool
         Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
         GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
         brickAtPosition.transform.parent = _levelManager.Bricks;
-        brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
-        brickAtPosition.hideFlags = HideFlags.DontSaveInBuild | HideFlags.HideInHierarchy;
-        _levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
+        brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);        
+        _levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
     }
 
     private GameObject GetSceneBrick(Vector3 position)
@@ -130,9 +131,9 @@ public class PaintTool
 
         Vector2 gridPosition = MousePositionToGridPosition(position);
 
-        if (_levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
+        if (_levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
         {
-            brick = _levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
+            brick = _levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
         }
         return brick;
     }
