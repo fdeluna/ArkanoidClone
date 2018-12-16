@@ -1,5 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
+[Serializable]
 [CreateAssetMenu(menuName = "Arkanoid/ New Level")]
 public class LevelData : ScriptableObject
 {
@@ -11,10 +14,30 @@ public class LevelData : ScriptableObject
     public Sprite background;
     public AudioClip backgroundMusic;
 
-
     public LevelData nextLevel;
 
-    // TODO BRICKS LIST TO PAINT
-    // public void save()
-    // public void load(LevelManager level)
+    private List<Transform> _bricks;
+
+    // TODO SAVE PREFAB AND LIST MAP???
+    public void Save(Transform level)
+    {
+        _bricks.Clear();
+        foreach (Transform t in level)
+        {
+            _bricks.Add(t);
+        }
+    }
+
+    public void Load(LevelManager level)
+    {
+        // TODO BACKGROUND
+        // TODO BACKGROUND AUDIO
+
+        foreach (Transform t in _bricks)
+        {
+            GameObject go = Instantiate(t.gameObject, level.Bricks);
+            go.transform.position = t.position;
+            go.transform.parent = level.Bricks;
+        }
+    }
 }

@@ -104,37 +104,32 @@ public class PaintTool
     private void DeleteBrickAtPosition(Vector3 mousePosition)
     {
         GameObject brickAtPosition = GetSceneBrick(mousePosition);
-
+        
         if (brickAtPosition != null)
-        {
-            GameObject.DestroyImmediate(brickAtPosition);
+        {            
+            GameObject.DestroyImmediate(brickAtPosition);            
         }
     }
-
 
     private void CreateBrickAtPosition(Vector3 mousePosition)
     {
-        GameObject brickAtPosition = GetSceneBrick(mousePosition);
-
-        if (brickAtPosition != null)
-        {
-            GameObject.DestroyImmediate(brickAtPosition);
-        }
-
-        brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
+        DeleteBrickAtPosition(mousePosition);
+        Debug.Log("Create");
+        GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
         brickAtPosition.transform.parent = _levelManager.Bricks;
         brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
     }
-
+    
     private GameObject GetSceneBrick(Vector3 position)
     {
         GameObject brick = null;
         Camera camera = SceneView.currentDrawingSceneView.camera;
         Ray r = camera.ScreenPointToRay(new Vector3(position.x, camera.pixelHeight - position.y));
-        RaycastHit hit;
-        if (Physics.Raycast(r, out hit, Mathf.Infinity))
-        {
+        Debug.Log("Ray");
+        if (Physics.Raycast(r, out RaycastHit hit,Mathf.Infinity))
+        {            
             brick = hit.transform.gameObject;
+            Debug.Log("hit");
         }
 
         return brick;

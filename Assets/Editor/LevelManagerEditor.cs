@@ -5,9 +5,7 @@ using UnityEngine;
 [CustomEditor(typeof(LevelManager))]
 public class LevelManagerEditor : Editor
 {
-    // MODE EDIT
-    //  - Paint mode
-    //  - Delete mode
+    // MODE EDIT    
     //  - Set background music mode    
     // MOVE LOGIC TO SCRIPT PAINT BRUSH REPENSARLO
     //  - CHECK IF OBJECT AT POSITION    
@@ -49,7 +47,7 @@ public class LevelManagerEditor : Editor
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                Debug.Log("Save in ScriptableObject");
+                _target.LevelData.Save(_target.Bricks);
             }
         }
         else
@@ -79,7 +77,7 @@ public class LevelManagerEditor : Editor
         // LOOK AT BACKGROUND
         // TODO FIX THIS
         //sceneView.LookAt(_target.Background.position);       
-        sceneView.in2DMode = true;
+        sceneView.in2DMode = true;        
         Event e = Event.current;
 
         _paintTool.OnMouseMove(e.mousePosition);

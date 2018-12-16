@@ -16,7 +16,7 @@ public class LevelManager : MonoBehaviour
         }
     }
     private Transform _background;
-    
+
     public Transform Bricks
     {
         get
@@ -28,7 +28,29 @@ public class LevelManager : MonoBehaviour
             return _bricks;
         }
     }
-    public Transform _bricks;
+    private Transform _bricks;
 
     // AQUI FALTA MAPEAR LAS VARIABLES DEL SCRIPTABLEoBJECT
+
+    void Awake()
+    {
+        CleanLevel();        
+    }
+
+    private void Start()
+    {
+        LevelData.Load(this);
+    }
+
+    void CleanLevel()
+    {
+        if (Bricks.childCount > 0)
+        {
+            foreach (Transform t in Bricks)
+            {
+                GameObject.Destroy(t.gameObject);
+            }
+        }
+    }
+    
 }
