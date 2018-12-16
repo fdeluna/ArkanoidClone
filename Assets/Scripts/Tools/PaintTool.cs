@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public class PaintTool
 {
-    private const string BRICKS_PATH = "Assets/Prefabs/Bricks";
+    private const string BRICKS_PATH = "Assets/Prefabs/Resources/Bricks";
 
     private bool EraseMode
     {
@@ -24,7 +24,7 @@ public class PaintTool
     }
     private bool _eraseMode = false;
 
-    private LevelManager _levelManager;
+    private LevelInfo _levelManager;
 
     // Grid offset
     private Vector3 _offSetPosition;
@@ -38,7 +38,7 @@ public class PaintTool
     private List<GameObject> _bricksPrefabs;
     private GameObject _selectedPrefab;
 
-    public PaintTool(LevelManager levelManager)
+    public PaintTool(LevelInfo levelManager)
     {
         _levelManager = levelManager;
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
@@ -120,6 +120,7 @@ public class PaintTool
         GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
         brickAtPosition.transform.parent = _levelManager.Bricks;
         brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
+        brickAtPosition.hideFlags = HideFlags.DontSaveInBuild | HideFlags.HideInHierarchy;
         _levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
     }
 
@@ -132,7 +133,7 @@ public class PaintTool
         if (_levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
         {
             brick = _levelManager.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
-        }        
+        }
         return brick;
     }
 
@@ -214,7 +215,6 @@ public class PaintTool
         }
         return guiContents.ToArray();
     }
-
 
     private GUIStyle GetGUIStyle()
     {

@@ -2,8 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(LevelManager))]
-public class LevelManagerEditor : Editor
+[CustomEditor(typeof(LevelInfo))]
+public class LevelInfoEditor : Editor
 {
     // MODE EDIT    
     //  - Set background music mode    
@@ -11,12 +11,12 @@ public class LevelManagerEditor : Editor
     //  - CHECK IF OBJECT AT POSITION    
 
     private bool _edit = false;
-    private LevelManager _target;
+    private LevelInfo _target;
     private PaintTool _paintTool;
 
     private void Awake()
     {
-        _target = (LevelManager)target;
+        _target = (LevelInfo)target;
         _paintTool = new PaintTool(_target);
     }
 
@@ -40,6 +40,11 @@ public class LevelManagerEditor : Editor
 
         if (_edit)
         {
+            if (GUILayout.Button("Clear"))
+            {
+                _target.CleanLevel();
+            }
+
             if (GUILayout.Button("Save"))
             {
                 _edit = false;

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
-[ExecuteInEditMode,DisallowMultipleComponent]
-public class LevelManager : MonoBehaviour
+[DisallowMultipleComponent]
+public class LevelInfo : MonoBehaviour
 {
     public LevelData LevelData;
 
@@ -29,18 +29,30 @@ public class LevelManager : MonoBehaviour
             return _bricks;
         }
     }
-
-    public GameObject[] LevelBricks;
-
     private Transform _bricks;
 
+
+    [HideInInspector]
+    public GameObject[] LevelBricks
+    {
+        get
+        {
+            if (_levelBricks == null || _levelBricks.Length == 0)
+            {
+                _levelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
+            }
+            return _levelBricks;
+        }
+    }
+
+
+    private GameObject[] _levelBricks;
 
     // AQUI FALTA MAPEAR LAS VARIABLES DEL SCRIPTABLEoBJECT
 
     void Awake()
     {
-        CleanLevel();
-        LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
+        CleanLevel();        
     }
 
     private void Start()
@@ -48,15 +60,16 @@ public class LevelManager : MonoBehaviour
         LevelData.Load(this);
     }
 
-    void CleanLevel()
+    public void CleanLevel()
     {
         if (Bricks.childCount > 0)
         {
             foreach (Transform t in Bricks)
             {
-                GameObject.Destroy(t.gameObject);
+                GameObject.DestroyImmediate(t.gameObject);
             }
         }
+        _levelBricks = null;
     }
     
 }
