@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[Serializable]
 [CreateAssetMenu(menuName = "Arkanoid/ New Level")]
 public class LevelData : ScriptableObject
 {
@@ -29,9 +28,13 @@ public class LevelData : ScriptableObject
             return _levelBricks;
         }
     }
+
+    // TODO MOVE TO PAINT TOOL
     private GameObject[] _levelBricks;
 
-    private List<BrickPosition> _bricks;
+
+    // TODO POPULATE FROM PAINT TOOL
+    private List<BrickPosition> _bricks = new List<BrickPosition>();
 
     [Serializable]
     private class BrickPosition
@@ -61,17 +64,25 @@ public class LevelData : ScriptableObject
         }
     }
 
-    public void Load(LevelInfo level)
+    public void LoadEditor(Transform parent)
     {
-        // TODO BACKGROUND
-        // TODO BACKGROUND AUDIO        
-        //GameObject go = Resources.Load<GameObject>("Assets/Prefabs/Resources/Bricks/Blue Brick.prefab") as GameObject;
+        foreach (BrickPosition brickPosition in _bricks)
+        {
+            GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/"+ brickPosition.PrefabName+".prefab", typeof(GameObject)) as GameObject;
+            GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            go.transform.position = brickPosition.Position;
+            go.transform.parent = parent;
+            go.hideFlags = HideFlags.DontSave;
+        }
+    }
 
+    public void Load(Transform parent)
+    {        
         foreach (BrickPosition brickPosition in _bricks)
         {
             GameObject go = Instantiate(Resources.Load("Bricks/" + brickPosition.PrefabName)) as GameObject;
             go.transform.position = brickPosition.Position;
-            go.transform.parent = level.Bricks;
+            go.transform.parent = parent;
             go.hideFlags = HideFlags.DontSave;
         }
     }

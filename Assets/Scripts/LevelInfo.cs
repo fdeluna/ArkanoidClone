@@ -39,7 +39,7 @@ public class LevelInfo : MonoBehaviour
 
     private void Start()
     {
-        LevelData.Load(this);
+        LevelData.Load(Bricks);
     }
 
     void CleanLevel()

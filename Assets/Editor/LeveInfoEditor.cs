@@ -14,10 +14,14 @@ public class LevelInfoEditor : Editor
     private LevelInfo _target;
     private PaintTool _paintTool;
 
+    // Serialized property
+    SerializedProperty _levelDataProperty;
+
     private void Awake()
     {
         _target = (LevelInfo)target;
         _paintTool = new PaintTool(_target);
+        _levelDataProperty = serializedObject.FindProperty("LevelData");
     }
 
     private void OnEnable()
@@ -36,10 +40,18 @@ public class LevelInfoEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        DrawDefaultInspector();
+        EditorGUI.BeginChangeCheck();
+        EditorGUILayout.PropertyField(_levelDataProperty);
+        if (EditorGUI.EndChangeCheck())
+        {
+            serializedObject.ApplyModifiedProperties();
+            ClearChildren();
+            _target.LevelData.LoadEditor(_target.Bricks);
+        }
+        //EditorGUI.EndChangeCheck();
 
         if (_edit)
-        {            
+        {
             if (GUILayout.Button("Save"))
             {
                 _edit = false;
@@ -60,7 +72,7 @@ public class LevelInfoEditor : Editor
                 SceneView.onSceneGUIDelegate += HandleMouseEvents;
                 SceneView.RepaintAll();
             }
-        }
+        }        
     }
 
     private void OnSceneGUI()
@@ -74,17 +86,37 @@ public class LevelInfoEditor : Editor
 
     void HandleMouseEvents(SceneView sceneView)
     {
-        // LOOK AT BACKGROUND
-        // TODO FIX THIS
+        // LOOK AT BACKGROUND        
         //sceneView.LookAt(_target.Background.position);       
         sceneView.in2DMode = true;
         Event e = Event.current;
 
-        _paintTool.OnMouseMove(e.mousePosition);
-
-        if (e.button == 0 && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag))
+        if (_target.LevelData != null)
         {
-            _paintTool.OnMouseDown(e.mousePosition);
+            _paintTool.OnMouseMove(e.mousePosition);
+
+            if (e.button == 0 && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag))
+            {
+                _paintTool.OnMouseDown(e.mousePosition);
+            }
+        }
+    }
+
+    public void ClearChildren()
+    {
+        //Array to hold all child obj
+        List<Transform> allChildren = new List<Transform>();
+
+        //Find all child obj and store to that array
+        foreach (Transform child in _target.Bricks)
+        {
+            allChildren.Add(child);
+        }
+
+        //Now destroy them
+        foreach (Transform child in allChildren)
+        {
+            DestroyImmediate(child.gameObject);
         }
     }
 }

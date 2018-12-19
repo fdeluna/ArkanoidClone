@@ -55,13 +55,28 @@ public class PaintTool
     public void UpdateTool()
     {
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
-
-        // REFACTOR DRAWGRID
-        // TODO REAPAINT LEVEL WHEN DATA CHANGED
         DrawGrid();
         Handles.BeginGUI();
         GUILayout.Window(0, new Rect(50f, 100f, 225f, 360f), DrawPrefabPreviewWindow, "Level Editor");
         Handles.EndGUI();
+    }
+
+    public void LoadEditor()
+    {
+        if (_levelManager.LevelData != null && _levelManager.Bricks.childCount != _levelManager.LevelData.LevelBricks.Length)
+        {
+            for (int x = 0; x < _levelManager.LevelData.LevelWidth; x++)
+            {
+                for (int y = 0; y < _levelManager.LevelData.LevelHeight; y++)
+                {
+                    if (_levelManager.LevelData.LevelBricks[x + y * _levelManager.LevelData.LevelWidth] != null)
+                    {
+                        GameObject brick = _levelManager.LevelData.LevelBricks[x + y * _levelManager.LevelData.LevelWidth];
+                        CreateBrickAtPosition(brick.transform.position, brick);
+                    }
+                }
+            }
+        }
     }
 
     private void DrawGrid()
@@ -101,7 +116,7 @@ public class PaintTool
         }
         else if (_selectedPrefab != null)
         {
-            CreateBrickAtPosition(mousePosition);
+            CreateBrickAtPosition(mousePosition, _bricksPrefabs[_selectedPrefabIndex]);
         }
     }
 
@@ -115,14 +130,17 @@ public class PaintTool
         }
     }
 
-    private void CreateBrickAtPosition(Vector3 mousePosition)
+    private void CreateBrickAtPosition(Vector3 mousePosition, GameObject prefab)
     {
         DeleteBrickAtPosition(mousePosition);
-        Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
-        GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(_bricksPrefabs[_selectedPrefabIndex]) as GameObject;
-        brickAtPosition.transform.parent = _levelManager.Bricks;
-        brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);        
-        _levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
+        if (prefab != null)
+        {
+            Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
+            GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+            brickAtPosition.transform.parent = _levelManager.Bricks;
+            brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
+            _levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
+        }
     }
 
     private GameObject GetSceneBrick(Vector3 position)
