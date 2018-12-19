@@ -14,38 +14,20 @@ public class LevelData : ScriptableObject
     public Sprite background;
     public AudioClip backgroundMusic;
     public LevelData nextLevel;
-
-    // Current Data in Inspector
-    [HideInInspector]
-    public GameObject[] LevelBricks
-    {
-        get
-        {
-            if (_levelBricks == null || _levelBricks.Length == 0)
-            {
-                _levelBricks = new GameObject[LevelWidth * LevelHeight];
-            }
-            return _levelBricks;
-        }
-    }
-
-    // TODO MOVE TO PAINT TOOL
-    private GameObject[] _levelBricks;
-
-
+      
     // TODO POPULATE FROM PAINT TOOL
-    private List<BrickPosition> _bricks = new List<BrickPosition>();
+    public List<BrickPosition> LevelBricks = new List<BrickPosition>();
 
     [Serializable]
-    private class BrickPosition
+    public class BrickPosition
     {
         public Vector3 Position;
         public string PrefabName;
     }
     
-    public void Save()
+    public void Save(GameObject[] LevelBricks)
     {
-        _bricks.Clear();
+        this.LevelBricks.Clear();
         for (int x = 0; x < LevelWidth; x++)
         {
             for (int y = 0; y < LevelHeight; y++)
@@ -58,27 +40,15 @@ public class LevelData : ScriptableObject
                         Position = brick.transform.position,
                         PrefabName = brick.name
                     };
-                    _bricks.Add(brickPosion);
+                    this.LevelBricks.Add(brickPosion);
                 }
             }
         }
     }
 
-    public void LoadEditor(Transform parent)
-    {
-        foreach (BrickPosition brickPosition in _bricks)
-        {
-            GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/"+ brickPosition.PrefabName+".prefab", typeof(GameObject)) as GameObject;
-            GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-            go.transform.position = brickPosition.Position;
-            go.transform.parent = parent;
-            go.hideFlags = HideFlags.DontSave;
-        }
-    }
-
     public void Load(Transform parent)
     {        
-        foreach (BrickPosition brickPosition in _bricks)
+        foreach (BrickPosition brickPosition in LevelBricks)
         {
             GameObject go = Instantiate(Resources.Load("Bricks/" + brickPosition.PrefabName)) as GameObject;
             go.transform.position = brickPosition.Position;

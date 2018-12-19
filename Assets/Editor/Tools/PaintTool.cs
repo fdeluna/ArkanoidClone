@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using static LevelData;
 
 [Serializable]
 public class PaintTool
@@ -38,11 +39,15 @@ public class PaintTool
     private List<GameObject> _bricksPrefabs;
     private GameObject _selectedPrefab;
 
+    // TODO MOVE TO PAINT TOOL
+    public GameObject[] LevelBricks;
+
     public PaintTool(LevelInfo levelManager)
     {
         _levelManager = levelManager;
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
+        LevelBricks = new GameObject[_levelManager.LevelData.LevelWidth * _levelManager.LevelData.LevelHeight];
     }
 
     public void Reset()
@@ -52,6 +57,26 @@ public class PaintTool
         _selectedPrefabIndex = -1;
     }
 
+    public void LoadEditor()
+    {
+        if (_levelManager.LevelData != null)
+        {
+            LevelBricks = new GameObject[_levelManager.LevelData.LevelWidth * _levelManager.LevelData.LevelHeight];
+
+            foreach (BrickPosition brickPosition in _levelManager.LevelData.LevelBricks)
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/" + brickPosition.PrefabName + ".prefab", typeof(GameObject)) as GameObject;
+                GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                go.transform.position = brickPosition.Position;
+                go.transform.parent = _levelManager.Bricks;
+                go.hideFlags = HideFlags.DontSave;
+
+                Vector2Int gridPosition = WorldPositionToGrid(brickPosition.Position);
+                LevelBricks[gridPosition.x + gridPosition.y * _levelManager.LevelData.LevelWidth] = go;
+            }
+        }
+    }
+
     public void UpdateTool()
     {
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
@@ -59,24 +84,6 @@ public class PaintTool
         Handles.BeginGUI();
         GUILayout.Window(0, new Rect(50f, 100f, 225f, 360f), DrawPrefabPreviewWindow, "Level Editor");
         Handles.EndGUI();
-    }
-
-    public void LoadEditor()
-    {
-        if (_levelManager.LevelData != null && _levelManager.Bricks.childCount != _levelManager.LevelData.LevelBricks.Length)
-        {
-            for (int x = 0; x < _levelManager.LevelData.LevelWidth; x++)
-            {
-                for (int y = 0; y < _levelManager.LevelData.LevelHeight; y++)
-                {
-                    if (_levelManager.LevelData.LevelBricks[x + y * _levelManager.LevelData.LevelWidth] != null)
-                    {
-                        GameObject brick = _levelManager.LevelData.LevelBricks[x + y * _levelManager.LevelData.LevelWidth];
-                        CreateBrickAtPosition(brick.transform.position, brick);
-                    }
-                }
-            }
-        }
     }
 
     private void DrawGrid()
@@ -139,7 +146,7 @@ public class PaintTool
             GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
             brickAtPosition.transform.parent = _levelManager.Bricks;
             brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
-            _levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
+            LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
         }
     }
 
@@ -149,9 +156,9 @@ public class PaintTool
 
         Vector2 gridPosition = MousePositionToGridPosition(position);
 
-        if (_levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
+        if (LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
         {
-            brick = _levelManager.LevelData.LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
+            brick = LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
         }
         return brick;
     }
@@ -171,12 +178,12 @@ public class PaintTool
         return WorldPositionToGrid(camera.ScreenToWorldPoint(mousePosition));
     }
 
-    private Vector2 WorldPositionToGrid(Vector3 worldPosition)
+    private Vector2Int WorldPositionToGrid(Vector3 worldPosition)
     {
         int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / _levelManager.LevelData.BrickWidth, 0, _levelManager.LevelData.LevelWidth - 1));
         int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / _levelManager.LevelData.BrickHeight, 0, _levelManager.LevelData.LevelHeight - 1));
 
-        return new Vector2(x, y);
+        return new Vector2Int(x, y);
     }
 
     private Vector3 GridToWorldPosition(Vector2 gridPosition)

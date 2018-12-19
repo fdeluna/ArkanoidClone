@@ -46,7 +46,7 @@ public class LevelInfoEditor : Editor
         {
             serializedObject.ApplyModifiedProperties();
             ClearChildren();
-            _target.LevelData.LoadEditor(_target.Bricks);
+            _paintTool.LoadEditor();
         }
         //EditorGUI.EndChangeCheck();
 
@@ -59,7 +59,7 @@ public class LevelInfoEditor : Editor
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                _target.LevelData.Save();
+                _target.LevelData.Save(_paintTool.LevelBricks);
             }
         }
         else
@@ -72,7 +72,7 @@ public class LevelInfoEditor : Editor
                 SceneView.onSceneGUIDelegate += HandleMouseEvents;
                 SceneView.RepaintAll();
             }
-        }        
+        }
     }
 
     private void OnSceneGUI()
