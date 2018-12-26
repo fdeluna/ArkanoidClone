@@ -70,7 +70,6 @@ public class PaintTool
                 GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 go.transform.position = brickPosition.Position;
                 go.transform.parent = _levelManager.Bricks;
-                go.hideFlags = HideFlags.DontSave;
 
                 Vector2Int gridPosition = WorldPositionToGrid(brickPosition.Position);
                 LevelBricks[gridPosition.x + gridPosition.y * _levelManager.LevelData.LevelWidth] = go;
