@@ -27,8 +27,6 @@ public class LevelInfoEditor : Editor
     private void OnEnable()
     {
         _edit = EditorPrefs.GetBool("_edit", false);
-        SceneView.onSceneGUIDelegate -= HandleMouseEvents;
-        SceneView.onSceneGUIDelegate += HandleMouseEvents;
     }
 
     private void OnDisable()
@@ -48,10 +46,11 @@ public class LevelInfoEditor : Editor
             ClearChildren();
             _paintTool.LoadEditor();
         }
-        //EditorGUI.EndChangeCheck();
+
 
         if (_edit)
         {
+
             if (GUILayout.Button("Save"))
             {
                 _edit = false;
@@ -86,9 +85,9 @@ public class LevelInfoEditor : Editor
 
     void HandleMouseEvents(SceneView sceneView)
     {
-        // LOOK AT BACKGROUND        
-        //sceneView.LookAt(_target.Background.position);       
-        sceneView.in2DMode = true;
+        SceneView.currentDrawingSceneView.LookAt(_target.Background.position);
+        SceneView.currentDrawingSceneView.in2DMode = true;
+        // LOOK AT BACKGROUND                        
         Event e = Event.current;
 
         if (_target.LevelData != null)

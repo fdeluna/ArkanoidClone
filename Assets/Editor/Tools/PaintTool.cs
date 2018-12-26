@@ -48,6 +48,7 @@ public class PaintTool
         _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
         LevelBricks = new GameObject[_levelManager.LevelData.LevelWidth * _levelManager.LevelData.LevelHeight];
+        LoadEditor();
     }
 
     public void Reset()

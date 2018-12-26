@@ -44,7 +44,7 @@ public class BallController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!_hitted)
+        if (!_hitted && _launched)
         {
             Vector3 center = collision.collider.bounds.center;
             ContactPoint2D contactPoint = collision.contacts[0];
