@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-public class ToolsUtils
+public  static class EditorToolsUtils
 {
 
     public static List<GameObject> GetPrefabsAtPath(string prefab)

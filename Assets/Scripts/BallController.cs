@@ -7,7 +7,6 @@ public class BallController : MonoBehaviour
     [SerializeField] float deviation = 0.3f;
 
     private Vector3 _direction = new Vector2(0.15f, 1f);
-    private bool _hitted = false;
     private bool _launched = false;
     private PaddleController _paddle;
 
@@ -37,14 +36,9 @@ public class BallController : MonoBehaviour
         }
     }
 
-    void LateUpdate()
-    {
-        _hitted = false;
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!_hitted && _launched)
+        if (_launched)
         {
             Vector3 center = collision.collider.bounds.center;
             ContactPoint2D contactPoint = collision.contacts[0];
@@ -58,8 +52,8 @@ public class BallController : MonoBehaviour
                     speed = Mathf.Clamp(speed + 0.25f, 5, 10);
                     break;
                 case "Brick":
+
                     Brick brick = collision.collider.GetComponent<Brick>();
-                    _hitted = true;
                     brick.Hit();
                     break;
             }

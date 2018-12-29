@@ -5,17 +5,17 @@ using UnityEngine;
 
 [CreateAssetMenu(menuName = "Arkanoid/ New Level")]
 public class LevelData : ScriptableObject
-{
-    public int LevelHeight = 15;
-    public int LevelWidth = 10;
-    public float BrickHeight = 1;
-    public float BrickWidth = 0.5f;
+{    
+    public readonly int LevelHeight = 14;
+    public readonly int LevelWidth = 16;
+    public readonly float BrickHeight = 0.5f;
+    public readonly float BrickWidth = 1;
 
     public Sprite background;
     public AudioClip backgroundMusic;
     public LevelData nextLevel;
       
-    // TODO POPULATE FROM PAINT TOOL
+    [HideInInspector]
     public List<BrickPosition> LevelBricks = new List<BrickPosition>();
 
     [Serializable]

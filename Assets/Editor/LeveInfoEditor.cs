@@ -16,17 +16,21 @@ public class LevelInfoEditor : Editor
 
     // Serialized property
     SerializedProperty _levelDataProperty;
-
-    private void Awake()
-    {
-        _target = (LevelInfo)target;
-        _paintTool = new PaintTool(_target);
-        _levelDataProperty = serializedObject.FindProperty("LevelData");
-    }
-
+  
     private void OnEnable()
     {
+        _target = (LevelInfo)target;
+        _levelDataProperty = serializedObject.FindProperty("LevelData");
+        _target.Bricks.ClearChildrens();
+        _paintTool = new PaintTool(_target);
+
         _edit = EditorPrefs.GetBool("_edit", false);
+        if (_edit)
+        {
+            // TODO CHANGE LOAD EDITOR TO GRID TOOL
+            // REFACTOR TO GET GRID TOOL
+            SceneView.onSceneGUIDelegate += HandleMouseEvents;
+        }
     }
 
     private void OnDisable()
@@ -40,16 +44,21 @@ public class LevelInfoEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_levelDataProperty);
-        if (EditorGUI.EndChangeCheck())
+
+        if (EditorGUI.EndChangeCheck() && !_edit)
         {
             serializedObject.ApplyModifiedProperties();
-            ClearChildren();
+            _target.Bricks.ClearChildrens();
+            _paintTool.LevelManager = _target;
             _paintTool.LoadEditor();
         }
 
-
         if (_edit)
         {
+            if (GUILayout.Button("Clear"))
+            {
+                _target.Bricks.ClearChildrens();
+            }
 
             if (GUILayout.Button("Save"))
             {
@@ -63,6 +72,8 @@ public class LevelInfoEditor : Editor
         }
         else
         {
+
+
             if (GUILayout.Button("Edit"))
             {
                 _edit = true;
@@ -84,10 +95,8 @@ public class LevelInfoEditor : Editor
     }
 
     void HandleMouseEvents(SceneView sceneView)
-    {
-        SceneView.currentDrawingSceneView.LookAt(_target.Background.position);
-        SceneView.currentDrawingSceneView.in2DMode = true;
-        // LOOK AT BACKGROUND                        
+    {        
+        SceneView.currentDrawingSceneView.in2DMode = true;        
         Event e = Event.current;
 
         if (_target.LevelData != null)
@@ -98,24 +107,6 @@ public class LevelInfoEditor : Editor
             {
                 _paintTool.OnMouseDown(e.mousePosition);
             }
-        }
-    }
-
-    public void ClearChildren()
-    {
-        //Array to hold all child obj
-        List<Transform> allChildren = new List<Transform>();
-
-        //Find all child obj and store to that array
-        foreach (Transform child in _target.Bricks)
-        {
-            allChildren.Add(child);
-        }
-
-        //Now destroy them
-        foreach (Transform child in allChildren)
-        {
-            DestroyImmediate(child.gameObject);
         }
     }
 }

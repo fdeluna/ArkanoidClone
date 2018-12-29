@@ -7,6 +7,8 @@ using static LevelData;
 [Serializable]
 public class PaintTool
 {
+    public LevelInfo LevelManager;
+
     private const string BRICKS_PATH = "Assets/Prefabs/Resources/Bricks";
 
     private bool EraseMode
@@ -25,7 +27,6 @@ public class PaintTool
     }
     private bool _eraseMode = false;
 
-    private LevelInfo _levelManager;
 
     // Grid offset
     private Vector3 _offSetPosition;
@@ -44,10 +45,11 @@ public class PaintTool
 
     public PaintTool(LevelInfo levelManager)
     {
-        _levelManager = levelManager;
-        _bricksPrefabs = ToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
+        LevelManager = levelManager;
+        _bricksPrefabs = EditorToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
-        LevelBricks = new GameObject[_levelManager.LevelData.LevelWidth * _levelManager.LevelData.LevelHeight];
+        _offSetPosition = new Vector3(LevelManager.transform.position.x + LevelManager.LevelData.BrickWidth / 2, LevelManager.transform.position.y - LevelManager.LevelData.BrickHeight / 2);
+        LevelBricks = new GameObject[LevelManager.LevelData.LevelWidth * LevelManager.LevelData.LevelHeight];
         LoadEditor();
     }
 
@@ -59,20 +61,21 @@ public class PaintTool
     }
 
     public void LoadEditor()
-    {
-        if (_levelManager.LevelData != null)
+    {        
+        if (LevelManager.LevelData != null)
         {
-            LevelBricks = new GameObject[_levelManager.LevelData.LevelWidth * _levelManager.LevelData.LevelHeight];
+            Debug.Log("Level Loaded");
+            LevelBricks = new GameObject[LevelManager.LevelData.LevelWidth * LevelManager.LevelData.LevelHeight];
 
-            foreach (BrickPosition brickPosition in _levelManager.LevelData.LevelBricks)
+            foreach (BrickPosition brickPosition in LevelManager.LevelData.LevelBricks)
             {
                 GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/" + brickPosition.PrefabName + ".prefab", typeof(GameObject)) as GameObject;
                 GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 go.transform.position = brickPosition.Position;
-                go.transform.parent = _levelManager.Bricks;
+                go.transform.parent = LevelManager.Bricks;
 
                 Vector2Int gridPosition = WorldPositionToGrid(brickPosition.Position);
-                LevelBricks[gridPosition.x + gridPosition.y * _levelManager.LevelData.LevelWidth] = go;
+                LevelBricks[gridPosition.x + gridPosition.y * LevelManager.LevelData.LevelWidth] = go;
             }
         }
     }
@@ -87,26 +90,25 @@ public class PaintTool
     }
 
     private void DrawGrid()
-    {
-        _offSetPosition = new Vector3(_levelManager.transform.position.x + _levelManager.LevelData.BrickWidth / 2, _levelManager.transform.position.y - _levelManager.LevelData.BrickHeight / 2);
-        for (int x = 0; x < _levelManager.LevelData.LevelWidth; x++)
+    {        
+        for (int x = 0; x < LevelManager.LevelData.LevelWidth; x++)
         {
-            for (int y = 0; y < _levelManager.LevelData.LevelHeight; y++)
+            for (int y = 0; y < LevelManager.LevelData.LevelHeight; y++)
             {
-                Vector3 pos = new Vector3(_offSetPosition.x + x * _levelManager.LevelData.BrickWidth, _offSetPosition.y - y * _levelManager.LevelData.BrickHeight);
-                ToolsUtils.DrawRectangle(pos, _levelManager.LevelData.BrickWidth, _levelManager.LevelData.BrickHeight, Color.clear, Color.white);
+                Vector3 pos = new Vector3(_offSetPosition.x + x * LevelManager.LevelData.BrickWidth, _offSetPosition.y - y * LevelManager.LevelData.BrickHeight);
+                EditorToolsUtils.DrawRectangle(pos, LevelManager.LevelData.BrickWidth, LevelManager.LevelData.BrickHeight, Color.clear, Color.white);
             }
         }
     }
 
     public void OnMouseMove(Vector3 mousePosition)
     {
-        if (Selection.activeTransform == _levelManager.transform)
+        if (Selection.activeTransform == LevelManager.transform)
         {
             Vector3 worldPosition = MousePositionToWorldPosition(mousePosition);
             if (EraseMode)
             {
-                ToolsUtils.DrawRectangle(worldPosition, _levelManager.LevelData.BrickWidth, _levelManager.LevelData.BrickHeight, new Color32(255, 77, 77, 70), Color.black);
+                EditorToolsUtils.DrawRectangle(worldPosition, LevelManager.LevelData.BrickWidth, LevelManager.LevelData.BrickHeight, new Color32(255, 77, 77, 70), Color.black);
             }
             else if (_selectedPrefab != null)
             {
@@ -144,9 +146,9 @@ public class PaintTool
         {
             Vector2 gridPosition = MousePositionToGridPosition(mousePosition);
             GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-            brickAtPosition.transform.parent = _levelManager.Bricks;
+            brickAtPosition.transform.parent = LevelManager.Bricks;
             brickAtPosition.transform.position = MousePositionToWorldPosition(mousePosition);
-            LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] = brickAtPosition;
+            LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelManager.LevelData.LevelWidth] = brickAtPosition;
         }
     }
 
@@ -156,9 +158,9 @@ public class PaintTool
 
         Vector2 gridPosition = MousePositionToGridPosition(position);
 
-        if (LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth] != null)
+        if (LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelManager.LevelData.LevelWidth] != null)
         {
-            brick = LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelManager.LevelData.LevelWidth];
+            brick = LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelManager.LevelData.LevelWidth];
         }
         return brick;
     }
@@ -180,8 +182,8 @@ public class PaintTool
 
     private Vector2Int WorldPositionToGrid(Vector3 worldPosition)
     {
-        int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / _levelManager.LevelData.BrickWidth, 0, _levelManager.LevelData.LevelWidth - 1));
-        int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / _levelManager.LevelData.BrickHeight, 0, _levelManager.LevelData.LevelHeight - 1));
+        int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / LevelManager.LevelData.BrickWidth, 0, LevelManager.LevelData.LevelWidth - 1));
+        int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / LevelManager.LevelData.BrickHeight, 0, LevelManager.LevelData.LevelHeight - 1));
 
         return new Vector2Int(x, y);
     }
@@ -190,8 +192,8 @@ public class PaintTool
     {
         Vector3 pos = new Vector3
         {
-            x = _levelManager.transform.position.x + (gridPosition.x * _levelManager.LevelData.BrickWidth + _levelManager.LevelData.BrickWidth / 2.0f),
-            y = _levelManager.transform.position.y - (gridPosition.y * _levelManager.LevelData.BrickHeight + _levelManager.LevelData.BrickHeight / 2.0f)
+            x = LevelManager.transform.position.x + (gridPosition.x * LevelManager.LevelData.BrickWidth + LevelManager.LevelData.BrickWidth / 2.0f),
+            y = LevelManager.transform.position.y - (gridPosition.y * LevelManager.LevelData.BrickHeight + LevelManager.LevelData.BrickHeight / 2.0f)
         };
 
         return pos;
@@ -218,7 +220,7 @@ public class PaintTool
             _currentPrefabIndex = index;
             GameObject.DestroyImmediate(_selectedPrefab);
             _selectedPrefab = PrefabUtility.InstantiatePrefab(_bricksPrefabs[index]) as GameObject;
-            _selectedPrefab.transform.parent = _levelManager.transform;
+            _selectedPrefab.transform.parent = LevelManager.transform;
             _selectedPrefab.hideFlags = HideFlags.HideInHierarchy;
             _selectedPrefab.layer = LayerMask.NameToLayer("Ignore Raycast");
         }
