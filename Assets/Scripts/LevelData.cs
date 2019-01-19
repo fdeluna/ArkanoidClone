@@ -5,26 +5,21 @@ using UnityEngine;
 
 [CreateAssetMenu(menuName = "Arkanoid/ New Level")]
 public class LevelData : ScriptableObject
-{    
+{
     public readonly int LevelHeight = 14;
     public readonly int LevelWidth = 16;
     public readonly float BrickHeight = 0.5f;
     public readonly float BrickWidth = 1;
 
-    public Sprite background;
-    public AudioClip backgroundMusic;
-    public LevelData nextLevel;
-      
+    public Material Background;
+    public AudioClip BackgroundMusic;
+    public LevelData NextLevel;
+    [Range(0, 1)]
+    public float PowerUpChance = 0.1f;
+
     [HideInInspector]
     public List<BrickPosition> LevelBricks = new List<BrickPosition>();
 
-    [Serializable]
-    public class BrickPosition
-    {
-        public Vector3 Position;
-        public string PrefabName;
-    }
-    
     public void Save(GameObject[] LevelBricks)
     {
         this.LevelBricks.Clear();
@@ -44,16 +39,40 @@ public class LevelData : ScriptableObject
                 }
             }
         }
+        AssetDatabase.SaveAssets();
     }
 
-    public void Load(Transform parent)
-    {        
+    public int Load(LevelManager levelManager)
+    {
+        int totalBricks = 0;
         foreach (BrickPosition brickPosition in LevelBricks)
         {
-            GameObject go = Instantiate(Resources.Load("Bricks/" + brickPosition.PrefabName)) as GameObject;
-            go.transform.position = brickPosition.Position;
-            go.transform.parent = parent;
-            go.hideFlags = HideFlags.DontSave;
+            Brick brick = (Instantiate(Resources.Load("Bricks/" + brickPosition.PrefabName)) as GameObject).GetComponent<Brick>();
+            brick.transform.position = brickPosition.Position;
+            brick.transform.parent = levelManager.Bricks;
+            brick.OnBrickDestroyed += levelManager.OnBrickDestroyed;
+            totalBricks = brick.bricktype == Brick.BrickType.DESTRUCTIBLE ? totalBricks + 1 : totalBricks;
+            brick.hideFlags = HideFlags.DontSave;
+        }
+
+        return totalBricks;
+    }
+
+    public void Clean(LevelManager levelManager)
+    {
+        foreach (Transform t in levelManager.Bricks)
+        {
+            Brick brick = t.GetComponent<Brick>();
+            brick.OnBrickDestroyed -= levelManager.OnBrickDestroyed;
+            Destroy(brick.gameObject);
         }
     }
+}
+
+
+[Serializable]
+public class BrickPosition
+{
+    public Vector3 Position;
+    public string PrefabName;
 }

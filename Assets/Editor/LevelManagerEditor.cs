@@ -2,27 +2,27 @@
 using UnityEditor;
 using UnityEngine;
 
-[CustomEditor(typeof(LevelInfo))]
-public class LevelInfoEditor : Editor
+[CustomEditor(typeof(LevelManager))]
+public class LevelManagerEditor : Editor
 {
-    // MODE EDIT    
-    //  - Set background music mode    
-    // MOVE LOGIC TO SCRIPT PAINT BRUSH REPENSARLO
-    //  - CHECK IF OBJECT AT POSITION    
+    // TODO 
+    //    - finish background edit     
+    // START WITH POWER UPS SYSTEM
+          
 
     private bool _edit = false;
-    private LevelInfo _target;
-    private PaintTool _paintTool;
+    private LevelManager _target;
+    private LevelEditor _paintTool;
 
     // Serialized property
-    SerializedProperty _levelDataProperty;
-  
+    SerializedProperty _levelDataProperty;    
+
     private void OnEnable()
     {
-        _target = (LevelInfo)target;
+        _target = (LevelManager)target;
         _levelDataProperty = serializedObject.FindProperty("LevelData");
         _target.Bricks.ClearChildrens();
-        _paintTool = new PaintTool(_target);
+        _paintTool = new LevelEditor(_target);
 
         _edit = EditorPrefs.GetBool("_edit", false);
         if (_edit)
@@ -46,12 +46,19 @@ public class LevelInfoEditor : Editor
         EditorGUILayout.PropertyField(_levelDataProperty);
 
         if (EditorGUI.EndChangeCheck() && !_edit)
-        {
-            serializedObject.ApplyModifiedProperties();
+        {            
             _target.Bricks.ClearChildrens();
-            _paintTool.LevelManager = _target;
+            _paintTool.LevelInfo = _target;
             _paintTool.LoadEditor();
         }
+
+
+        // TODO REFACTOR THIS
+        SerializedObject s = new SerializedObject(_levelDataProperty.objectReferenceValue);                
+        EditorGUILayout.PropertyField(s.FindProperty("NextLevel"));
+
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("PowerUp"));
+
 
         if (_edit)
         {
@@ -62,18 +69,17 @@ public class LevelInfoEditor : Editor
 
             if (GUILayout.Button("Save"))
             {
+                EditorUtility.SetDirty(_target);
                 _edit = false;
                 EditorPrefs.DeleteKey("edit");
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                _target.LevelData.Save(_paintTool.LevelBricks);
+                _target.LevelData.Save(_paintTool.LevelBricks);               
             }
         }
         else
         {
-
-
             if (GUILayout.Button("Edit"))
             {
                 _edit = true;
@@ -83,6 +89,7 @@ public class LevelInfoEditor : Editor
                 SceneView.RepaintAll();
             }
         }
+        serializedObject.ApplyModifiedProperties();
     }
 
     private void OnSceneGUI()

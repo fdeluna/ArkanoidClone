@@ -52,7 +52,6 @@ public class BallController : MonoBehaviour
                     speed = Mathf.Clamp(speed + 0.25f, 5, 10);
                     break;
                 case "Brick":
-
                     Brick brick = collision.collider.GetComponent<Brick>();
                     brick.Hit();
                     break;

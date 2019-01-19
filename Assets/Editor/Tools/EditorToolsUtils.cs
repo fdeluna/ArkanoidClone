@@ -20,6 +20,20 @@ public  static class EditorToolsUtils
     }
 
 
+    public static List<Material> GetBackGroundMaterialsAtPath(string prefab)
+    {
+        string[] prefabsGUIDs = AssetDatabase.FindAssets("t:Material", new string[] { prefab });
+        List<Material> materials = new List<Material>();
+
+        foreach (string prefabGUID in prefabsGUIDs)
+        {
+            materials.Add((Material)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(prefabGUID), typeof(Material)));
+        }
+
+        return materials;
+    }
+
+
     public static void DrawRectangle(Vector3 position, float width, float height, Color backgroundColor, Color outLineColor)
     {
         Vector3 p0 = new Vector3(position.x - width / 2, position.y + height / 2, 0);
@@ -32,5 +46,49 @@ public  static class EditorToolsUtils
         v[3] = new Vector3(p0.x, p1.y, 0);
 
         Handles.DrawSolidRectangleWithOutline(v, backgroundColor, outLineColor);
+    }
+
+
+    public static void DrawScrollViewWindow<T>(int windowID, ref Vector2 scrollPosition, ref int currentIndex, List<T> objects, float guiStylefixedWidth, float guiStylefixedHeigh) where T : Object
+    {
+        scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+        currentIndex = GUILayout.SelectionGrid(
+            currentIndex,
+            GetGUIContents(objects),
+            2,
+            GetGUIStyle(guiStylefixedWidth, guiStylefixedHeigh)
+            );
+        GUILayout.EndScrollView();        
+    }
+
+    private static  GUIContent[] GetGUIContents<T>(List<T> objects) where T : Object
+    {
+        List<GUIContent> guiContents = new List<GUIContent>();
+        if (objects.Count > 0)
+        {
+            foreach (Object unityObject in objects)
+            {
+                GUIContent guiContent = new GUIContent
+                {
+                    text = unityObject.name,
+                    image = AssetPreview.GetAssetPreview(unityObject)
+                };
+                guiContents.Add(guiContent);
+            }
+        }
+        return guiContents.ToArray();
+    }
+
+
+    private static GUIStyle GetGUIStyle(float guiStylefixedWidth, float guiStylefixedHeigh)
+    {
+        GUIStyle guiStyle = new GUIStyle(GUI.skin.button)
+        {
+            imagePosition = ImagePosition.ImageAbove,
+            alignment = TextAnchor.UpperCenter,
+            fixedWidth = guiStylefixedWidth,
+            fixedHeight = guiStylefixedHeigh
+        };
+        return guiStyle;
     }
 }
