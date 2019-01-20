@@ -43,11 +43,10 @@ public class LevelManager : MonoBehaviour
     public void OnBrickDestroyed(Brick brick)
     {
         totalBricks--;
-
-        float range = Random.Range(0, 1f);
-        Debug.Log(range);
-        if (range <= LevelData.PowerUpChance)
+        
+        if (Random.Range(0, 1f) <= LevelData.PowerUpChance)
         {
+            // TODO RANDOM POWER UP
             Instantiate(PowerUp, brick.transform.position, Quaternion.identity);
         }
 

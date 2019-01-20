@@ -15,7 +15,7 @@ MonoBehaviour:
   Background: {fileID: 0}
   BackgroundMusic: {fileID: 0}
   NextLevel: {fileID: 0}
-  PowerUpChance: 0.1
+  PowerUpChance: 1
   LevelBricks:
   - Position: {x: -3.5, y: 0.25, z: 0}
     PrefabName: Pink Brick
