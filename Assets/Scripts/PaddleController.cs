@@ -1,27 +1,32 @@
 ﻿using DG.Tweening;
+using System.Collections;
 using UnityEngine;
 
 public class PaddleController : MonoBehaviour
 {
+
+    public bool debug = false;
+
     [SerializeField]
     float speed = 2.5f;
+    [SerializeField]
+    float fireRate = 0.35f;
 
     [HideInInspector]
     public Vector3 InitScale;
 
+    private bool _fire = false;
     private float _randomnessMove = 0;
     private Vector3 _initPosition;
     private Tweener _currentTween;
 
+    private Transform _gun;
+
     private void Awake()
     {
         _initPosition = transform.position;
+        _gun = transform.Find("Gun");
         InitScale = transform.localScale;
-    }
-
-    private void Update()
-    {
-        // TODO FIRE
     }
 
     void FixedUpdate()
@@ -37,14 +42,28 @@ public class PaddleController : MonoBehaviour
     {
         transform.position = _initPosition;
         transform.localScale = InitScale;
+        DisableGun();
+        _randomnessMove = 0;
+    }
+
+
+    #region Power Ups
+
+    public void ResetPowerUps()
+    {
+        _randomnessMove = 0;
+        DisableGun();
+        ModifyScale(InitScale);
     }
 
     public void ModifyScale(Vector3 scale)
     {
-        _currentTween?.Kill();
-        transform.DOShakeScale(0.25f, 2.5f).SetAutoKill(true);
-        _currentTween = transform.DOScale(new Vector3(scale.x, InitScale.y), 0.35f).SetAutoKill(true);
-        _randomnessMove = 0;
+        if (scale != transform.localScale)
+        {
+            _currentTween?.Kill();
+            transform.DOShakeScale(0.25f, 2.5f).SetAutoKill(true);
+            _currentTween = transform.DOScale(new Vector3(scale.x, InitScale.y), 0.35f).SetAutoKill(true);
+        }
     }
 
     public void ResetScale()
@@ -56,4 +75,34 @@ public class PaddleController : MonoBehaviour
     {
         _randomnessMove = randomness;
     }
+
+    // TODO SEGUIR POR AQUÍ
+    public void EnableGun()
+    {
+        _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));
+        _fire = true;
+    }
+
+    public void DisableGun()
+    {
+        if (_fire)
+        {
+            _gun.DOLocalMoveY(0, 0.75f).SetEase(Ease.OutBounce).SetAutoKill(true);
+            _fire = false;
+        }
+    }
+
+    IEnumerator FireGun()
+    {
+        while (_fire)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.Log("FIRE");
+                yield return new WaitForSeconds(fireRate);
+            }
+            yield return null;
+        }
+    }
+    #endregion
 }

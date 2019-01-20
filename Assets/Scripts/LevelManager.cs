@@ -20,8 +20,7 @@ public class LevelManager : MonoBehaviour
             return _bricks;
         }
     }
-    private Transform _bricks;
-    // AQUI FALTA MAPEAR LAS VARIABLES DEL SCRIPTABLEOBJECT
+    private Transform _bricks;    
 
     public void LoadLevel()
     {
