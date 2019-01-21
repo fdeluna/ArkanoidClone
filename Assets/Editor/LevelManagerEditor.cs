@@ -45,8 +45,10 @@ public class LevelManagerEditor : Editor
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_levelDataProperty);
 
-        if (EditorGUI.EndChangeCheck() && !_edit)
-        {            
+        if (EditorGUI.EndChangeCheck())
+        {
+            serializedObject.ApplyModifiedProperties();
+            _edit = false;
             _target.Bricks.ClearChildrens();
             _paintTool.LevelInfo = _target;
             _paintTool.LoadEditor();
@@ -55,8 +57,7 @@ public class LevelManagerEditor : Editor
 
         // TODO REFACTOR THIS
         SerializedObject s = new SerializedObject(_levelDataProperty.objectReferenceValue);                
-        EditorGUILayout.PropertyField(s.FindProperty("NextLevel"));
-
+        EditorGUILayout.PropertyField(s.FindProperty("NextLevel"));    
         EditorGUILayout.PropertyField(serializedObject.FindProperty("PowerUp"));
 
 

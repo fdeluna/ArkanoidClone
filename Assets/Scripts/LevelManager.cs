@@ -52,6 +52,7 @@ public class LevelManager : MonoBehaviour
         if (totalBricks <= 0)
         {
             Debug.Log("WIN");
+            LoadNextLevel();
         }
     }
 }

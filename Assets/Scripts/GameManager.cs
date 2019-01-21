@@ -14,5 +14,5 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         _levelManager.LoadLevel();
-    }
+    }    
 }
