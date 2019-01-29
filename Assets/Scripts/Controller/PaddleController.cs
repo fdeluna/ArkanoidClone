@@ -11,6 +11,8 @@ public class PaddleController : MonoBehaviour
     float speed = 2.5f;
     [SerializeField]
     float fireRate = 0.35f;
+    [SerializeField]
+    GameObject proyectile;
 
     [HideInInspector]
     public Vector3 InitScale;
@@ -79,8 +81,8 @@ public class PaddleController : MonoBehaviour
     // TODO SEGUIR POR AQUÍ
     public void EnableGun()
     {
-        _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));
-        _fire = true;
+        _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));        
+
     }
 
     public void DisableGun()
@@ -94,15 +96,20 @@ public class PaddleController : MonoBehaviour
 
     IEnumerator FireGun()
     {
+        _fire = true;
         while (_fire)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                Debug.Log("FIRE");
+                foreach (Transform firePoint in _gun)
+                {
+                    PoollingPrefabManager.Instance.GetPooledPrefab(proyectile, firePoint.position);
+                }
                 yield return new WaitForSeconds(fireRate);
             }
             yield return null;
         }
     }
+
     #endregion
 }
