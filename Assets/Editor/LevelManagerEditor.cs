@@ -5,30 +5,30 @@ using UnityEngine;
 [CustomEditor(typeof(LevelManager))]
 public class LevelManagerEditor : Editor
 {
-    // TODO 
-    //    - finish background edit     
-    // START WITH POWER UPS SYSTEM
-          
-
+    // START WITH POWER UPS SYSTEM          
     private bool _edit = false;
     private LevelManager _target;
-    private LevelEditor _paintTool;
+    private LevelEditorTool _paintTool;
 
     // Serialized property
-    SerializedProperty _levelDataProperty;    
+    SerializedProperty _levelDataProperty;
+    SerializedProperty _powerUpChance;
+    SerializedProperty _nextLevelDataProperty;
+    SerializedProperty _powerUpsList;
+
+    // Serialized object
+    SerializedObject _levelDataSerializedObject;
 
     private void OnEnable()
     {
         _target = (LevelManager)target;
-        _levelDataProperty = serializedObject.FindProperty("LevelData");
+        InitEditorProperties();
         _target.Bricks.ClearChildrens();
-        _paintTool = new LevelEditor(_target);
+        _paintTool = new LevelEditorTool(_target);
 
         _edit = EditorPrefs.GetBool("_edit", false);
         if (_edit)
         {
-            // TODO CHANGE LOAD EDITOR TO GRID TOOL
-            // REFACTOR TO GET GRID TOOL
             SceneView.onSceneGUIDelegate += HandleMouseEvents;
         }
     }
@@ -40,29 +40,35 @@ public class LevelManagerEditor : Editor
         _paintTool.Reset();
     }
 
+    private void InitEditorProperties()
+    {
+        // properties
+        _levelDataProperty = serializedObject.FindProperty("LevelData");
+        _levelDataSerializedObject = new SerializedObject(_levelDataProperty.objectReferenceValue);
+        _nextLevelDataProperty = _levelDataSerializedObject.FindProperty("NextLevel");
+        _powerUpChance = _levelDataSerializedObject.FindProperty("PowerUpChance");
+        _powerUpsList = _levelDataSerializedObject.FindProperty("PowerUpsProbability");
+    }
+
     public override void OnInspectorGUI()
     {
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_levelDataProperty);
+        EditorGUILayout.PropertyField(_nextLevelDataProperty);
 
         if (EditorGUI.EndChangeCheck())
         {
+            _levelDataSerializedObject.ApplyModifiedProperties();
             serializedObject.ApplyModifiedProperties();
             _edit = false;
-            _target.Bricks.ClearChildrens();
-            _paintTool.LevelInfo = _target;
-            _paintTool.LoadEditor();
+            _target.Bricks.ClearChildrens();            
+            _paintTool.LoadEditor();            
+            InitEditorProperties();
         }
-
-
-        // TODO REFACTOR THIS
-        SerializedObject s = new SerializedObject(_levelDataProperty.objectReferenceValue);                
-        EditorGUILayout.PropertyField(s.FindProperty("NextLevel"));    
-        EditorGUILayout.PropertyField(serializedObject.FindProperty("PowerUp"));
-
 
         if (_edit)
         {
+            PowerUpsEditor();
             if (GUILayout.Button("Clear"))
             {
                 _target.Bricks.ClearChildrens();
@@ -76,7 +82,7 @@ public class LevelManagerEditor : Editor
                 Tools.current = Tool.View;
                 SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                _target.LevelData.Save(_paintTool.LevelBricks);               
+                _target.LevelData.Save(_paintTool.LevelBricks);
             }
         }
         else
@@ -90,6 +96,7 @@ public class LevelManagerEditor : Editor
                 SceneView.RepaintAll();
             }
         }
+        _levelDataSerializedObject.ApplyModifiedProperties();
         serializedObject.ApplyModifiedProperties();
     }
 
@@ -103,8 +110,8 @@ public class LevelManagerEditor : Editor
     }
 
     void HandleMouseEvents(SceneView sceneView)
-    {        
-        SceneView.currentDrawingSceneView.in2DMode = true;        
+    {
+        SceneView.currentDrawingSceneView.in2DMode = true;
         Event e = Event.current;
 
         if (_target.LevelData != null)
@@ -116,5 +123,13 @@ public class LevelManagerEditor : Editor
                 _paintTool.OnMouseDown(e.mousePosition);
             }
         }
+    }
+
+    void PowerUpsEditor()
+    {
+        EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+        EditorGUILayout.LabelField("PowerUps", EditorStyles.boldLabel);
+        EditorGUILayout.PropertyField(_powerUpChance);
+        EditorGUILayout.PropertyField(_powerUpsList, true);
     }
 }

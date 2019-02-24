@@ -332,7 +332,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c593988013cabe41b1cfc10af87193d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  debug: 0
   speed: 5
   fireRate: 0.35
+  proyectile: {fileID: 2137190178674709677, guid: 6fd5530a0dc8eb64b89c2b54a7cdba0d,
+    type: 3}
   InitScale: {x: 0, y: 0, z: 0}

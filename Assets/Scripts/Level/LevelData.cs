@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Arkanoid/ New Level")]
 public class LevelData : ScriptableObject
 {
     public readonly int LevelHeight = 14;
@@ -11,15 +9,18 @@ public class LevelData : ScriptableObject
     public readonly float BrickHeight = 0.5f;
     public readonly float BrickWidth = 1;
 
-    public Material Background;
+    public Material BackgroundMaterial;
     public AudioClip BackgroundMusic;
     public LevelData NextLevel;
-    [Range(0, 1)]
-    public float PowerUpChance = 0.1f;
 
     [HideInInspector]
     public List<BrickPosition> LevelBricks = new List<BrickPosition>();
 
+    [Range(0, 1)]
+    public float PowerUpChance = 0.1f;    
+    public List<PowerUpProbability> PowerUpsProbability = new List<PowerUpProbability>();
+
+    
     public void Save(GameObject[] LevelBricks)
     {
         this.LevelBricks.Clear();
@@ -59,20 +60,30 @@ public class LevelData : ScriptableObject
     }
 
     public void Clean(LevelManager levelManager)
-    {
+    {        
         foreach (Transform t in levelManager.Bricks)
         {
             Brick brick = t.GetComponent<Brick>();
             brick.OnBrickDestroyed -= levelManager.OnBrickDestroyed;
-            Destroy(brick.gameObject);
+            Destroy(brick.gameObject);            
         }
     }
-}
 
+    [MenuItem("Arkanoid/ New Level")]
+    public static void CreateLevel()
+    {
+        LevelData newLevel = ScriptableObject.CreateInstance<LevelData>();
+        // TODO GET LAST SCRIPTABLEOBJECT NAME        
+        string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/Levels/new Level.asset");
+        AssetDatabase.CreateAsset(newLevel, assetPathAndName);
+        List <GameObject> powerUps = Utils.GetPrefabsAtPath(Utils.POWERUPS_PATH);
 
-[Serializable]
-public class BrickPosition
-{
-    public Vector3 Position;
-    public string PrefabName;
+        foreach (GameObject powerUpPrefab in powerUps)
+        {
+            newLevel.PowerUpsProbability.Add(new PowerUpProbability() {powerUp = powerUpPrefab});
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+    }
 }

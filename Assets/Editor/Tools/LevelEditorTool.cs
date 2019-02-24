@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-public class LevelEditor
+public class LevelEditorTool
 {
     // Level Bricks
     public GameObject[] LevelBricks;
@@ -19,13 +19,9 @@ public class LevelEditor
             }
         }
     }
-
-    // Prefab Paths
-    private const string BRICKS_PATH = "Assets/Prefabs/Resources/Bricks";
-    private const string BACKGROUND_MATERIALS_PATH = "Assets/Material/Background Materials";
-    
+        
     private LevelManager _levelInfo;
-    
+
     private bool EraseMode
     {
         get
@@ -43,6 +39,7 @@ public class LevelEditor
     // Grid Tool
     private LevelGrid _grid;
 
+    #region Bricks Prefab Windows
     // Bricks Prefab window
     private Vector2 _paleteWindowPosition;
     private int _selectedPrefabIndex = 0;
@@ -51,13 +48,28 @@ public class LevelEditor
     private float _prefabPreviewHeight = 100f;
     private List<GameObject> _bricksPrefabs;
     private GameObject _selectedPrefab;
+    #endregion
 
+    #region Background Windows
+    // Bricks Prefab window
+    private Vector2 _backGroundWindowPosition;
+    private int _selectedBackgroundMaterialIndex = 0;
+    private int _currentBackgroundMaterialIndex = 0;
+    private float _backgroundPreviewWidth = 100f;
+    private float _backgroundPreviewHeight = 100f;
+    private List<Material> _backGroundMaterials;
+    private Material _selectedBackgrounMaterial;
+    #endregion
 
-    public LevelEditor(LevelManager levelManager)
-    {        
+    public LevelEditorTool(LevelManager levelManager)
+    {
         LevelInfo = levelManager;
-        _bricksPrefabs = EditorToolsUtils.GetPrefabsAtPath(BRICKS_PATH);
+
+        _bricksPrefabs = Utils.GetPrefabsAtPath(Utils.BRICKS_PATH);
+        _backGroundMaterials = Utils.GetBackGroundMaterialsAtPath(Utils.BACKGROUND_MATERIALS_PATH);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
+        _selectedBackgroundMaterialIndex = EditorPrefs.GetInt("_selectedBackgroundMaterialIndex", -1);
+
         LevelBricks = new GameObject[_levelInfo.LevelData.LevelWidth * _levelInfo.LevelData.LevelHeight];
         LoadEditor();
     }
@@ -87,6 +99,7 @@ public class LevelEditor
                 Vector2Int gridPosition = _grid.WorldPositionToGrid(brickPosition.Position);
                 LevelBricks[gridPosition.x + gridPosition.y * _levelInfo.LevelData.LevelWidth] = go;
             }
+            ChangeBackgroundMaterial(_levelInfo.LevelData.BackgroundMaterial);
         }
     }
 
@@ -95,10 +108,14 @@ public class LevelEditor
         HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Passive));
         _grid.DrawGrid();
         Handles.BeginGUI();
-        GUILayout.Window(0, new Rect(50f, 100f, 225f, 360f), DrawPrefabPreviewWindow, "Level Editor");
+
+        GUILayout.Window(0, new Rect(15f, 20f, 135f, Camera.current.pixelRect.height - 20f), DrawPrefabPreviewWindow, "Level Editor");
+        GUILayout.Window(1, new Rect(Camera.current.pixelRect.width - 150f, 20f, 135f, Camera.current.pixelRect.height - 20f), DrawBackGroundWindow, "Background Materials");
 
         Handles.EndGUI();
     }
+
+    #region Level editor interactions
 
     public void OnMouseMove(Vector3 mousePosition)
     {
@@ -164,6 +181,10 @@ public class LevelEditor
         }
         return brick;
     }
+    #endregion
+
+
+    #region Scene Editor Windows
 
     private void DrawPrefabPreviewWindow(int windowID)
     {
@@ -186,42 +207,29 @@ public class LevelEditor
         }
     }
 
-    //// TODO MOVE TO BACKGROUND WHATEVER TOOL
+    private void DrawBackGroundWindow(int windowID)
+    {
 
-    //// TODO MOVE TO BACKGROUND WHATEVER TOOL
-    //private Vector3 _backgroundMaterialWindowPosition;
-    //private int _selectedIndexMaterial = -1;
+        EditorToolsUtils.DrawScrollViewWindow(windowID, ref _backGroundWindowPosition, ref _selectedBackgroundMaterialIndex, _backGroundMaterials, _backgroundPreviewWidth, _backgroundPreviewHeight);
+        EditorPrefs.SetInt("_selectedBackgroundMaterialIndex", _selectedBackgroundMaterialIndex);
+        GetSelectedBackgroundMaterial(_selectedBackgroundMaterialIndex);
+    }
 
-    //private void DrawBackGroundMaterialWindow(int windowID)
-    //{
-    //    _backgroundMaterialWindowPosition = GUILayout.BeginScrollView(_backgroundMaterialWindowPosition);
-    //    _selectedIndexMaterial = GUILayout.SelectionGrid(
-    //        _selectedIndexMaterial,
-    //        GetGUIContentsFromBackgroundMaterials(),
-    //        4,
-    //        GetGUIStyle()
-    //        );
-    //    GUILayout.EndScrollView();
-    //    //EditorPrefs.SetInt("_selectedPrefabIndex", _selectedPrefabIndex);
-    //    //GetSelectedItem(_selectedPrefabIndex);
-    //}
+    private void GetSelectedBackgroundMaterial(int index)
+    {
+        if (index != -1)
+        {
+            _currentBackgroundMaterialIndex = index;
+            ChangeBackgroundMaterial(_backGroundMaterials[_currentBackgroundMaterialIndex]);
+        }
+    }
 
-    //private GUIContent[] GetGUIContentsFromBackgroundMaterials()
-    //{
-    //    List<GUIContent> guiContents = new List<GUIContent>();
-    //    List<Material> materials = EditorToolsUtils.GetBackGroundMaterialsAtPath(BACKGROUND_MATERIALS_PATH);
-    //    if (materials.Count > 0)
-    //    {
-    //        foreach (Material prefab in materials)
-    //        {
-    //            GUIContent guiContent = new GUIContent
-    //            {
-    //                text = prefab.name,
-    //                image = AssetPreview.GetAssetPreview(prefab)
-    //            };
-    //            guiContents.Add(guiContent);
-    //        }
-    //    }
-    //    return guiContents.ToArray();
-    //}
+
+    private void ChangeBackgroundMaterial(Material backgroundMaterial)
+    {
+        _levelInfo.LevelData.BackgroundMaterial = backgroundMaterial;
+        _levelInfo.Background.GetComponent<Renderer>().material = backgroundMaterial;
+    }
+
+    #endregion
 }

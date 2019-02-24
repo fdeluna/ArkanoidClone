@@ -6,7 +6,6 @@ public class PowerUpMultipleBalls : PowerUp
 
     public override void ApplyPowerUp()
     {
-
         for (int i =0; i < balls; i++)
         {
             _ball.InstantiateBall();

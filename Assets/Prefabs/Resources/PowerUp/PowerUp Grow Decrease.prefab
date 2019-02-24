@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7221835446875984390}
   - component: {fileID: 2268857596194413944}
   - component: {fileID: 7325264205771954296}
-  - component: {fileID: 9138658021752383159}
+  - component: {fileID: 3533483964169735881}
   m_Layer: 8
   m_Name: PowerUp Grow Decrease
   m_TagString: Untagged
@@ -119,7 +119,7 @@ CircleCollider2D:
   m_Offset: {x: -0.03360262, y: -0.006592269}
   serializedVersion: 2
   m_Radius: 0.32225943
---- !u!114 &9138658021752383159
+--- !u!114 &3533483964169735881
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -128,10 +128,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2268857596194413943}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ee8b3f08b51fd94fb1fd9ed5831f3f7, type: 3}
+  m_Script: {fileID: 11500000, guid: 320917a1b74968841828598cca66de00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   particles: {fileID: 0}
   fallSpeed: 5
-  growType: 1
   IncreaseMultiply: 2

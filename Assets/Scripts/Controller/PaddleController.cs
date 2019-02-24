@@ -3,10 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 public class PaddleController : MonoBehaviour
-{
-
-    public bool debug = false;
-
+{    
     [SerializeField]
     float speed = 2.5f;
     [SerializeField]
@@ -16,6 +13,8 @@ public class PaddleController : MonoBehaviour
 
     [HideInInspector]
     public Vector3 InitScale;
+    [HideInInspector]
+    public PowerUp CurrentPowerUp;
 
     private bool _fire = false;
     private float _randomnessMove = 0;
@@ -77,12 +76,10 @@ public class PaddleController : MonoBehaviour
     {
         _randomnessMove = randomness;
     }
-
-    // TODO SEGUIR POR AQUÍ
+    
     public void EnableGun()
     {
         _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));        
-
     }
 
     public void DisableGun()

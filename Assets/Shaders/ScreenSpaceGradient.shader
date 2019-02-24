@@ -24,7 +24,7 @@ struct Input
 };
 
 void surf (Input IN, inout SurfaceOutput o) {
-	float2 screenUV = IN.screenPos.xy / IN.screenPos.w;
+	float2 screenUV = IN.screenPos.xy / IN.screenPos.w * 2;
 	fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * lerp(_Color2,_Color,screenUV.y);
 	o.Albedo = c.rgb;
 	o.Alpha = c.a;

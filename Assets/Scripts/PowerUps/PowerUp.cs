@@ -29,7 +29,7 @@ public abstract class PowerUp : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // TODO SPAWN PARTICLES;
+        _paddle.CurrentPowerUp = this;        
         DestroyPowerUp();
     }
 
