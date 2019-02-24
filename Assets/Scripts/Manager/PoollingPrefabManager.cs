@@ -26,7 +26,7 @@ public class PoollingPrefabManager : MonoBehaviour
                 }
             }
             return _instance;
-        }
+        }       
     }
     private static PoollingPrefabManager _instance;
 

@@ -12,7 +12,6 @@ public class BulletController : MonoBehaviour
         transform.Translate(Vector3.up * speed * Time.deltaTime);
     }
 
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         // TODO SPAWN PARTICLES

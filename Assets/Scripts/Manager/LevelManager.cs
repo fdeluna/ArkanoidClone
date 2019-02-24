@@ -8,6 +8,7 @@ public class LevelManager : MonoBehaviour
     #region Level Data
     public LevelData LevelData;
     static int totalBricks;
+    
     public Transform Bricks
     {
         get
@@ -35,11 +36,12 @@ public class LevelManager : MonoBehaviour
     private Transform _background;
     #endregion
 
-    #region Powerups
+    #region Current Game
+    [HideInInspector]
+    public int TotalBalls = 1;
     private List<PowerUpProbability> _levelPowerUps;
     private PaddleController _paddle;
     #endregion
-
 
     private void Awake()
     {
@@ -75,16 +77,28 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    public void OnBallDestroyed()
+    {
+        TotalBalls--;
+        if (TotalBalls <= 0)
+        {
+            Debug.Log("Lose");
+        }
+    }
+
     private void SpawnPowerUp(Vector3 position)
     {
-        if (Random.Range(0, 1f) <= LevelData.PowerUpChance)
+        if (TotalBalls == 1)
         {
-            GameObject powerUp = GetRandomPowerUp();
-            while (powerUp == null)
+            if (Random.Range(0, 1f) <= LevelData.PowerUpChance)
             {
-                powerUp = GetRandomPowerUp();
+                GameObject powerUp = GetRandomPowerUp();
+                while (powerUp == null)
+                {
+                    powerUp = GetRandomPowerUp();
+                }
+                PoollingPrefabManager.Instance.GetPooledPrefab(powerUp, position);
             }
-            PoollingPrefabManager.Instance.GetPooledPrefab(powerUp, position);
         }
     }
 
@@ -107,5 +121,5 @@ public class LevelManager : MonoBehaviour
             }
         }
         return powerUp;
-    }
+    }    
 }

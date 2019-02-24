@@ -20,9 +20,20 @@ public class BallController : MonoBehaviour
     public delegate void BallDestroyed();
     public event BallDestroyed OnBallDestroyed;
 
-    private void Awake()
+    void Awake()
     {
-        _paddle = FindObjectOfType<PaddleController>();
+        _paddle = FindObjectOfType<PaddleController>();        
+    }
+
+    private void OnEnable()
+    {
+        OnBallDestroyed -= GameManager.Instance.LevelManager.OnBallDestroyed;
+        OnBallDestroyed += GameManager.Instance.LevelManager.OnBallDestroyed;
+    }
+
+    private void OnDisable()
+    {
+        OnBallDestroyed -= GameManager.Instance.LevelManager.OnBallDestroyed;
     }
 
     void FixedUpdate()
@@ -85,6 +96,8 @@ public class BallController : MonoBehaviour
             if (OnBallDestroyed != null)
             {
                 OnBallDestroyed.Invoke();
+                gameObject.SetActive(false);
+                Reset();
             }
         }
     }
@@ -106,7 +119,7 @@ public class BallController : MonoBehaviour
 
     public void InstantiateBall()
     {
-        BallController ball = Instantiate(gameObject, transform.position, Quaternion.identity).GetComponent<BallController>();
+        BallController ball = PoollingPrefabManager.Instance.GetPooledPrefab(gameObject, transform.position).GetComponent<BallController>();
         ball.IsLaunched = true;
         ball._direction = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
     }

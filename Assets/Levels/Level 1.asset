@@ -104,10 +104,10 @@ MonoBehaviour:
   PowerUpsProbability:
   - powerUp: {fileID: 2268857596194413943, guid: a5139df195d77f640802470141ea2722,
       type: 3}
-    probability: 0.5
+    probability: 0.226
   - powerUp: {fileID: 5863359510372748181, guid: 56d12f6ffbe42ca43be6dd357260b655,
       type: 3}
-    probability: 0.5
+    probability: 0
   - powerUp: {fileID: 7786738740072851849, guid: 6e59868b84c4746428894bbb50c9cf90,
       type: 3}
     probability: 0
@@ -116,7 +116,7 @@ MonoBehaviour:
     probability: 0
   - powerUp: {fileID: 432214114615654441, guid: 1c064ac10ed41284e82a78566bb6dbce,
       type: 3}
-    probability: 0
+    probability: 1
   - powerUp: {fileID: 1648000357116547582, guid: 501498fccf4c4614fa09439e3cfa5181,
       type: 3}
     probability: 0
