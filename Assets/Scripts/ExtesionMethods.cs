@@ -21,6 +21,12 @@ public static class ExtesionMethods
         }
     }
 
+    public static Vector2 ToVector2(this Vector3 v)
+    {
+        return new Vector2(v.x, v.y);
+    }
+
+
     private static System.Random rng = new System.Random();
     public static void Shuffle<T>(this IList<T> list)
     {        

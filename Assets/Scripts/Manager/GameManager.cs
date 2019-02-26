@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        LevelManager = FindObjectOfType<LevelManager>();
+        LevelManager = FindObjectOfType<LevelManager>();        
     }
 
     private void Start()

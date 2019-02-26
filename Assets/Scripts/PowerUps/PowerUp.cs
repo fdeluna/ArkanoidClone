@@ -13,13 +13,22 @@ public abstract class PowerUp : MonoBehaviour
     private void Awake()
     {
         _paddle = FindObjectOfType<PaddleController>();
-        _ball = FindObjectOfType<BallController>();
         _collider = GetComponent<Collider2D>();
     }
 
     private void OnEnable()
     {
         _collider.enabled = true;
+
+        // Needed here due to there could be more than one ballController for MultiBallPowerUp
+        foreach (BallController ball in FindObjectsOfType<BallController>())
+        {
+            if (ball.gameObject.activeInHierarchy)
+            {
+                _ball = ball;
+                break;
+            }
+        }
     }
 
     private void Update()
@@ -29,7 +38,7 @@ public abstract class PowerUp : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        _paddle.CurrentPowerUp = this;        
+        _paddle.CurrentPowerUp = this;
         DestroyPowerUp();
     }
 

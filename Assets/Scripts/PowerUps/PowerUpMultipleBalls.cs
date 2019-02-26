@@ -7,7 +7,7 @@
         GameManager.Instance.LevelManager.TotalBalls += 5;
         for (int i = 0; i < balls; i++)
         {
-            _ball.InstantiateBall();
+            _ball.InstantiateBall(_ball.transform.position);
         }
     }
 }

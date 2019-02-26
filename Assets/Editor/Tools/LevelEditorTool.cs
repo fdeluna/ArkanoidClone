@@ -82,9 +82,7 @@ public class LevelEditorTool
     }
 
     public void LoadEditor()
-    {
-        Debug.Log(_levelInfo.LevelData.name);
-
+    {        
         if (_levelInfo.LevelData != null)
         {
             LevelBricks = new GameObject[_levelInfo.LevelData.LevelWidth * _levelInfo.LevelData.LevelHeight];
