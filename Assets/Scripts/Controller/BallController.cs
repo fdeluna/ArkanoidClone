@@ -2,7 +2,7 @@
 
 public class BallController : MonoBehaviour
 {
-    [Range(5, 10)]
+    [Range(4, 8)]
     [SerializeField] float speed;
     [SerializeField] float deviation = 0.3f;
 
@@ -20,10 +20,8 @@ public class BallController : MonoBehaviour
     private Collider2D _collider2D;
     private bool _brickHitted = false;
     private int _layerMask;
-
-
     private Vector3 _contactPoint = Vector3.zero;
-    private Vector2 nextPosition;
+
 
     public delegate void BallDestroyed();
     public event BallDestroyed OnBallDestroyed;
@@ -56,25 +54,20 @@ public class BallController : MonoBehaviour
         }
         else
         {
-            RepositionRigidBody();
+            MoveBall();
         }
     }
 
-    private void LateUpdate()
+    private void MoveBall()
     {
-        _brickHitted = false;
-    }
-
-    private void RepositionRigidBody()
-    {
-        nextPosition = _rigidBody.position + (_direction.ToVector2() * speed) * Time.fixedDeltaTime;
-        Collider2D collider = Physics2D.OverlapBox(nextPosition, _collider2D.bounds.size.ToVector2() / 2, 0, _layerMask);
-        if (collider != null && !_brickHitted)
+        Vector2 nextPosition = _rigidBody.position + (_direction.ToVector2() * speed) * Time.fixedDeltaTime;
+        Collider2D collider = Physics2D.OverlapBox(nextPosition, _collider2D.bounds.size.ToVector2() * 0.5f, 0, _layerMask);
+        if (collider != null)
         {
             _brickHitted = true;
             _rigidBody.position = _rigidBody.position + (_direction.ToVector2() * collider.Distance(_collider2D).distance);
             Vector2 newDirection = Vector2.Reflect(_direction, collider.Distance(_collider2D).normal).normalized;
-            speed = Mathf.Clamp(speed + 0.1f, 5, 10);
+            speed = Mathf.Clamp(speed + 0.1f, 4, 8);
 
             switch (collider.tag)
             {
@@ -97,55 +90,12 @@ public class BallController : MonoBehaviour
                     if (IsSuperBall)
                     {
                         newDirection = _direction;
-                        _brickHitted = false;
                     }
                     break;
             }
             _direction = newDirection;
         }
         _rigidBody.MovePosition(_rigidBody.position + (_direction.ToVector2().normalized * speed) * Time.fixedDeltaTime);
-    }
-
-
-    // TODO MOVE TO REPOSITIO RIGIDBODY
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        //if (IsLaunched && !_brickHitted)
-        //{
-        //    _brickHitted = true;
-        //    ContactPoint2D contactPoint = collision.contacts[0];
-        //    Vector3 newDirection = Vector3.Reflect(_direction, contactPoint.normal).normalized;
-        //    Debug.DrawLine(contactPoint.point, contactPoint.point + contactPoint.normal * 2, Color.white);
-        //    Debug.DrawLine(contactPoint.point, contactPoint.point + newDirection.ToVector2() * 2, Color.blue);
-        //    //speed = Mathf.Clamp(speed + 0.25f, 5, 10);
-
-        //    switch (collision.collider.tag)
-        //    {
-        //        case "Player":
-        //            if (Magnet)
-        //            {
-        //                IsLaunched = false;
-        //                _contactPointX = _paddle.transform.position.x - contactPoint.point.x;
-        //            }
-        //            else
-        //            {
-        //                Vector3 center = collision.collider.bounds.center;
-        //                newDirection.x += center.x > contactPoint.point.x ? -deviation : deviation;
-        //            }
-        //            break;
-        //        case "Brick":
-        //            Brick brick = collision.collider.GetComponent<Brick>();
-        //            brick.Hit();
-        //            if (IsSuperBall)
-        //            {
-        //                newDirection = _direction;
-        //                _brickHitted = false;
-        //            }
-        //            break;
-        //    }
-        //    _direction = newDirection.normalized;
-        //}
-        //RepositionRigidBody();
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
@@ -159,16 +109,6 @@ public class BallController : MonoBehaviour
                 gameObject.SetActive(false);
                 Reset();
             }
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (_collider2D != null)
-        {
-            Gizmos.color = Color.cyan;
-            Gizmos.DrawWireSphere(_contactPoint, 0.5f);
-            Gizmos.DrawWireCube(nextPosition, _collider2D.bounds.size);
         }
     }
 
