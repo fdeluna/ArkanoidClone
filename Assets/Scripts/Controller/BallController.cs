@@ -17,7 +17,13 @@ public class BallController : MonoBehaviour
     private float _contactPointX = 0;
     private PaddleController _paddle;
     private Rigidbody2D _rigidBody;
+    private Collider2D _collider2D;
     private bool _brickHitted = false;
+    private int _layerMask;
+
+
+    private Vector3 _contactPoint = Vector3.zero;
+    private Vector2 nextPosition;
 
     public delegate void BallDestroyed();
     public event BallDestroyed OnBallDestroyed;
@@ -25,7 +31,9 @@ public class BallController : MonoBehaviour
     void Awake()
     {
         _rigidBody = GetComponent<Rigidbody2D>();
+        _collider2D = GetComponent<Collider2D>();
         _paddle = FindObjectOfType<PaddleController>();
+        _layerMask = (1 << LayerMask.NameToLayer("Brick")) | (1 << LayerMask.NameToLayer("Walls")) | (1 << LayerMask.NameToLayer("Player"));
     }
 
     private void OnEnable()
@@ -48,7 +56,7 @@ public class BallController : MonoBehaviour
         }
         else
         {
-            _rigidBody.MovePosition(_rigidBody.position + (_direction.ToVector2() * speed) * Time.fixedDeltaTime);            
+            RepositionRigidBody();
         }
     }
 
@@ -57,33 +65,34 @@ public class BallController : MonoBehaviour
         _brickHitted = false;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void RepositionRigidBody()
     {
-        if (IsLaunched && !_brickHitted)
+        nextPosition = _rigidBody.position + (_direction.ToVector2() * speed) * Time.fixedDeltaTime;
+        Collider2D collider = Physics2D.OverlapBox(nextPosition, _collider2D.bounds.size.ToVector2() / 2, 0, _layerMask);
+        if (collider != null && !_brickHitted)
         {
             _brickHitted = true;
-            ContactPoint2D contactPoint = collision.contacts[0];
-            Vector3 newDirection = Vector3.Reflect(_direction, contactPoint.normal).normalized;
-            Debug.DrawLine(contactPoint.point, contactPoint.point + contactPoint.normal * 2, Color.white);
-            Debug.DrawLine(contactPoint.point, contactPoint.point + newDirection.ToVector2() * 2, Color.blue);
-            //speed = Mathf.Clamp(speed + 0.25f, 5, 10);
+            _rigidBody.position = _rigidBody.position + (_direction.ToVector2() * collider.Distance(_collider2D).distance);
+            Vector2 newDirection = Vector2.Reflect(_direction, collider.Distance(_collider2D).normal).normalized;
+            speed = Mathf.Clamp(speed + 0.1f, 5, 10);
 
-            switch (collision.collider.tag)
+            switch (collider.tag)
             {
                 case "Player":
+                    RaycastHit2D hit = Physics2D.Raycast(_rigidBody.position, _direction);
                     if (Magnet)
                     {
                         IsLaunched = false;
-                        _contactPointX = _paddle.transform.position.x - contactPoint.point.x;
+                        _contactPointX = _paddle.transform.position.x - hit.point.x;
                     }
                     else
                     {
-                        Vector3 center = collision.collider.bounds.center;
-                        newDirection.x += center.x > contactPoint.point.x ? -deviation : deviation;
+                        Vector3 center = collider.bounds.center;
+                        newDirection.x += center.x > hit.point.x ? -deviation : deviation;
                     }
                     break;
                 case "Brick":
-                    Brick brick = collision.collider.GetComponent<Brick>();
+                    Brick brick = collider.GetComponent<Brick>();
                     brick.Hit();
                     if (IsSuperBall)
                     {
@@ -94,6 +103,49 @@ public class BallController : MonoBehaviour
             }
             _direction = newDirection;
         }
+        _rigidBody.MovePosition(_rigidBody.position + (_direction.ToVector2().normalized * speed) * Time.fixedDeltaTime);
+    }
+
+
+    // TODO MOVE TO REPOSITIO RIGIDBODY
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //if (IsLaunched && !_brickHitted)
+        //{
+        //    _brickHitted = true;
+        //    ContactPoint2D contactPoint = collision.contacts[0];
+        //    Vector3 newDirection = Vector3.Reflect(_direction, contactPoint.normal).normalized;
+        //    Debug.DrawLine(contactPoint.point, contactPoint.point + contactPoint.normal * 2, Color.white);
+        //    Debug.DrawLine(contactPoint.point, contactPoint.point + newDirection.ToVector2() * 2, Color.blue);
+        //    //speed = Mathf.Clamp(speed + 0.25f, 5, 10);
+
+        //    switch (collision.collider.tag)
+        //    {
+        //        case "Player":
+        //            if (Magnet)
+        //            {
+        //                IsLaunched = false;
+        //                _contactPointX = _paddle.transform.position.x - contactPoint.point.x;
+        //            }
+        //            else
+        //            {
+        //                Vector3 center = collision.collider.bounds.center;
+        //                newDirection.x += center.x > contactPoint.point.x ? -deviation : deviation;
+        //            }
+        //            break;
+        //        case "Brick":
+        //            Brick brick = collision.collider.GetComponent<Brick>();
+        //            brick.Hit();
+        //            if (IsSuperBall)
+        //            {
+        //                newDirection = _direction;
+        //                _brickHitted = false;
+        //            }
+        //            break;
+        //    }
+        //    _direction = newDirection.normalized;
+        //}
+        //RepositionRigidBody();
     }
 
     private void OnTriggerEnter2D(Collider2D collider)
@@ -107,6 +159,16 @@ public class BallController : MonoBehaviour
                 gameObject.SetActive(false);
                 Reset();
             }
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (_collider2D != null)
+        {
+            Gizmos.color = Color.cyan;
+            Gizmos.DrawWireSphere(_contactPoint, 0.5f);
+            Gizmos.DrawWireCube(nextPosition, _collider2D.bounds.size);
         }
     }
 
