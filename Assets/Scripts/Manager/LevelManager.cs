@@ -8,7 +8,7 @@ public class LevelManager : MonoBehaviour
     #region Level Data
     public LevelData LevelData;
     static int totalBricks;
-    
+
     public Transform Bricks
     {
         get
@@ -52,7 +52,7 @@ public class LevelManager : MonoBehaviour
     {
         CleanLevel();
         totalBricks = LevelData.Load(this);
-        _levelPowerUps = LevelData.PowerUpsProbability.OrderBy(o => o.probability).ToList();
+        _levelPowerUps = LevelData.PowerUpsProbability.Where(o => o.probability > 0).ToList();
     }
 
     public void CleanLevel()
@@ -113,7 +113,7 @@ public class LevelManager : MonoBehaviour
             totalProbability += pp.probability;
             if (probability < totalProbability)
             {
-                if (_paddle.CurrentPowerUp?.GetType() != pp.powerUp.GetComponent<PowerUp>().GetType())
+                if (_paddle.CurrentPowerUp?.GetType() != pp.powerUp.GetComponent<PowerUp>().GetType() && _levelPowerUps.Count > 1)
                 {
                     powerUp = pp.powerUp;
                     break;
@@ -121,5 +121,5 @@ public class LevelManager : MonoBehaviour
             }
         }
         return powerUp;
-    }    
+    }
 }

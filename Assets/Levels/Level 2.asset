@@ -12,11 +12,99 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d30a176751769348bd70489e6c77906, type: 3}
   m_Name: Level 2
   m_EditorClassIdentifier: 
-  BackgroundMaterial: {fileID: 0}
+  BackgroundMaterial: {fileID: 2100000, guid: 8f1463e9484d38b4fbfdff967a991f5b, type: 2}
   BackgroundMusic: {fileID: 0}
   NextLevel: {fileID: 0}
-  PowerUpChance: 0.1
-  LevelBricks: []
+  LevelBricks:
+  - Position: {x: -7.5, y: 4.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -7.5, y: -2.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -6.5, y: 4.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -6.5, y: 3.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -6.5, y: -1.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -6.5, y: -2.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -5.5, y: 3.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -5.5, y: 3.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -5.5, y: -1.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -5.5, y: -1.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -4.5, y: 3.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -4.5, y: 2.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -4.5, y: -0.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -3.5, y: 2.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -3.5, y: 2.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -3.5, y: 0.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -3.5, y: -0.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -2.5, y: 2.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -2.5, y: 1.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -2.5, y: 0.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -2.5, y: 0.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -1.5, y: 1.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -1.5, y: 1.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -1.5, y: 0.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -0.5, y: 1.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -0.5, y: 1.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: -0.5, y: 0.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: -0.5, y: 0.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 0.5, y: 2.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 0.5, y: 2.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 0.5, y: 1.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 0.5, y: 0.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 0.5, y: -0.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 0.5, y: -0.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 1.5, y: 3.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 1.5, y: 2.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 1.5, y: -0.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 1.5, y: -1.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 2.5, y: 4.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 2.5, y: 3.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 2.5, y: 3.25, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 2.5, y: -1.25, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 2.5, y: -1.75, z: 0}
+    PrefabName: Pink Brick
+  - Position: {x: 3.5, y: 4.25, z: 0}
+    PrefabName: Red Brick
+  PowerUpChance: 0
   PowerUpsProbability:
   - powerUp: {fileID: 2268857596194413943, guid: a5139df195d77f640802470141ea2722,
       type: 3}

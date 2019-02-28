@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 
 public class PaddleController : MonoBehaviour
-{    
+{
     [SerializeField]
     float speed = 2.5f;
     [SerializeField]
@@ -16,6 +16,8 @@ public class PaddleController : MonoBehaviour
     [HideInInspector]
     public PowerUp CurrentPowerUp;
 
+
+    private Rigidbody2D _rigidBody;
     private bool _fire = false;
     private float _randomnessMove = 0;
     private Vector3 _initPosition;
@@ -27,16 +29,17 @@ public class PaddleController : MonoBehaviour
     {
         _initPosition = transform.position;
         _gun = transform.Find("Gun");
+        _rigidBody = GetComponent<Rigidbody2D>();
         InitScale = transform.localScale;
     }
 
     void FixedUpdate()
     {
         // TODO CHANGE TO MOUSE
-        Vector3 direction = Vector3.right * Input.GetAxis("Horizontal");
-        Vector2 paddlePos = transform.position + direction * speed * Time.deltaTime;
+        Vector2 direction = Vector3.right * Input.GetAxis("Horizontal");
+        Vector2 paddlePos = _rigidBody.position + direction * speed * Time.deltaTime;
         paddlePos.x += Random.Range(-_randomnessMove, _randomnessMove);
-        transform.position = paddlePos;
+        _rigidBody.MovePosition(paddlePos);
     }
 
     public void Reset()
@@ -76,10 +79,10 @@ public class PaddleController : MonoBehaviour
     {
         _randomnessMove = randomness;
     }
-    
+
     public void EnableGun()
     {
-        _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));        
+        _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));
     }
 
     public void DisableGun()

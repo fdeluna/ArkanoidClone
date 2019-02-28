@@ -17,10 +17,10 @@ public class LevelData : ScriptableObject
     public List<BrickPosition> LevelBricks = new List<BrickPosition>();
 
     [Range(0, 1)]
-    public float PowerUpChance = 0.1f;    
+    public float PowerUpChance = 0.1f;
     public List<PowerUpProbability> PowerUpsProbability = new List<PowerUpProbability>();
 
-    
+
     public void Save(GameObject[] LevelBricks)
     {
         this.LevelBricks.Clear();
@@ -53,19 +53,19 @@ public class LevelData : ScriptableObject
             brick.transform.parent = levelManager.Bricks;
             brick.OnBrickDestroyed += levelManager.OnBrickDestroyed;
             totalBricks = brick.bricktype == Brick.BrickType.DESTRUCTIBLE ? totalBricks + 1 : totalBricks;
-            brick.hideFlags = HideFlags.DontSave;
+            //brick.hideFlags = HideFlags.DontSave;
         }
 
         return totalBricks;
     }
 
     public void Clean(LevelManager levelManager)
-    {        
+    {
         foreach (Transform t in levelManager.Bricks)
         {
             Brick brick = t.GetComponent<Brick>();
             brick.OnBrickDestroyed -= levelManager.OnBrickDestroyed;
-            Destroy(brick.gameObject);            
+            Destroy(brick.gameObject);
         }
     }
 
@@ -76,11 +76,11 @@ public class LevelData : ScriptableObject
         // TODO GET LAST SCRIPTABLEOBJECT NAME        
         string assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/Levels/new Level.asset");
         AssetDatabase.CreateAsset(newLevel, assetPathAndName);
-        List <GameObject> powerUps = Utils.GetPrefabsAtPath(Utils.POWERUPS_PATH);
+        List<GameObject> powerUps = Utils.GetPrefabsAtPath(Utils.POWERUPS_PATH);
 
         foreach (GameObject powerUpPrefab in powerUps)
         {
-            newLevel.PowerUpsProbability.Add(new PowerUpProbability() {powerUp = powerUpPrefab});
+            newLevel.PowerUpsProbability.Add(new PowerUpProbability() { powerUp = powerUpPrefab });
         }
 
         AssetDatabase.SaveAssets();
