@@ -116,7 +116,7 @@ public class BallController : MonoBehaviour
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         if (_scaleTweener == null || !_scaleTweener.active)
         {
-            _scaleTweener = _sprite.DOPunchScale(Vector3.one * 2, 0.15f).SetAutoKill();
+            _scaleTweener = _sprite.DOPunchScale(Vector3.one * 3, 0.15f).SetEase(Ease.InExpo).SetAutoKill();
         }
     }
 

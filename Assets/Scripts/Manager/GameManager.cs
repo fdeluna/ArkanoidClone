@@ -41,6 +41,11 @@ public class GameManager : MonoBehaviour
     {
         LevelManager.LoadLevel();
     }
+
+    public void LoadLevel()
+    {
+        LevelManager.LoadLevel();
+    }
     
 
 

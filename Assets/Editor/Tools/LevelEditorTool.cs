@@ -19,7 +19,7 @@ public class LevelEditorTool
             }
         }
     }
-        
+
     private LevelManager _levelInfo;
 
     private bool EraseMode
@@ -57,7 +57,7 @@ public class LevelEditorTool
     private int _currentBackgroundMaterialIndex = 0;
     private float _backgroundPreviewWidth = 100f;
     private float _backgroundPreviewHeight = 100f;
-    private List<Material> _backGroundMaterials;
+    private List<Sprite> _backGroundMaterials;
     private Material _selectedBackgrounMaterial;
     #endregion
 
@@ -82,7 +82,7 @@ public class LevelEditorTool
     }
 
     public void LoadEditor()
-    {        
+    {
         if (_levelInfo.LevelData != null)
         {
             LevelBricks = new GameObject[_levelInfo.LevelData.LevelWidth * _levelInfo.LevelData.LevelHeight];
@@ -97,7 +97,7 @@ public class LevelEditorTool
                 Vector2Int gridPosition = _grid.WorldPositionToGrid(brickPosition.Position);
                 LevelBricks[gridPosition.x + gridPosition.y * _levelInfo.LevelData.LevelWidth] = go;
             }
-            ChangeBackgroundMaterial(_levelInfo.LevelData.BackgroundMaterial);
+            ChangeBackground(_levelInfo.LevelData.BackgroundSprite);
         }
     }
 
@@ -218,15 +218,15 @@ public class LevelEditorTool
         if (index != -1)
         {
             _currentBackgroundMaterialIndex = index;
-            ChangeBackgroundMaterial(_backGroundMaterials[_currentBackgroundMaterialIndex]);
+            ChangeBackground(_backGroundMaterials[_currentBackgroundMaterialIndex]);
         }
     }
 
 
-    private void ChangeBackgroundMaterial(Material backgroundMaterial)
+    private void ChangeBackground(Sprite backgroundSprite)
     {
-        _levelInfo.LevelData.BackgroundMaterial = backgroundMaterial;
-        _levelInfo.Background.GetComponent<Renderer>().material = backgroundMaterial;
+        _levelInfo.LevelData.BackgroundSprite = backgroundSprite;
+        _levelInfo.Background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
     }
 
     #endregion

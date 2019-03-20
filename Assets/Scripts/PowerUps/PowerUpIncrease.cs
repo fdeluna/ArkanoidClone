@@ -3,6 +3,6 @@
     public override void ApplyPowerUp()
     {
         _growType = Grow.Increase;
-        base.ApplyPowerUp();        
+        base.ApplyPowerUp();                  
     }    
 }

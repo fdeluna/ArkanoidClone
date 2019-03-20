@@ -6,7 +6,7 @@ public class BulletController : MonoBehaviour
     float speed = 4f;
     [SerializeField]
     GameObject particles;
-    
+
     private void FixedUpdate()
     {
         transform.Translate(Vector3.up * speed * Time.deltaTime);
@@ -17,6 +17,6 @@ public class BulletController : MonoBehaviour
         // TODO SPAWN PARTICLES
         Destroy(gameObject);
         Brick brick = collision.collider.GetComponent<Brick>();
-        brick.Hit();
+        brick?.Hit();
     }
 }

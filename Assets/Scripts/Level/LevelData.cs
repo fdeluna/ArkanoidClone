@@ -1,15 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using DG.Tweening;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 public class LevelData : ScriptableObject
 {
+    enum SpawnAnimation { TopDown, LeftRight, Scale };
+
+
     public readonly int LevelHeight = 14;
     public readonly int LevelWidth = 16;
     public readonly float BrickHeight = 0.5f;
     public readonly float BrickWidth = 1;
 
-    public Material BackgroundMaterial;
+    public Sprite BackgroundSprite;
     public AudioClip BackgroundMusic;
     public LevelData NextLevel;
 
@@ -46,18 +50,55 @@ public class LevelData : ScriptableObject
     public int Load(LevelManager levelManager)
     {
         int totalBricks = 0;
+        SpawnAnimation spawnAnimation = (SpawnAnimation)Random.Range(0, 3);
         foreach (BrickPosition brickPosition in LevelBricks)
         {
             Brick brick = (Instantiate(Resources.Load("Bricks/" + brickPosition.PrefabName)) as GameObject).GetComponent<Brick>();
-            brick.transform.position = brickPosition.Position;
             brick.transform.parent = levelManager.Bricks;
+            brick.transform.position = brickPosition.Position;
+
+            switch (spawnAnimation)
+            {
+                case SpawnAnimation.TopDown:
+                    SpawnTopDown(brick.transform, brickPosition.Position);
+                    break;
+                case SpawnAnimation.LeftRight:
+                    SpawnLeftRight(brick.transform, brickPosition.Position);
+                    break;
+                case SpawnAnimation.Scale:
+                    SpawnSacle(brick.transform);
+                    break;
+            }
             brick.OnBrickDestroyed += levelManager.OnBrickDestroyed;
             totalBricks = brick.bricktype == Brick.BrickType.DESTRUCTIBLE ? totalBricks + 1 : totalBricks;
-            //brick.hideFlags = HideFlags.DontSave;
         }
 
         return totalBricks;
     }
+
+
+    private void SpawnTopDown(Transform brick, Vector3 endPosition)
+    {
+        Vector3 startPosition = new Vector3(brick.transform.localPosition.x, 1);
+        brick.transform.localPosition = startPosition;
+        brick.transform.DOMove(endPosition, 2f).SetDelay(Random.Range(0.5f, 1.5f)).SetEase(Ease.OutExpo).OnComplete(() => brick.transform.position = endPosition);
+    }
+
+    private void SpawnLeftRight(Transform brick, Vector3 endPosition)
+    {
+        float x = brick.position.x > 0 ? 10 : -10;
+        Vector3 startPosition = new Vector3(x, brick.transform.position.y);
+        brick.transform.position = startPosition;
+        brick.transform.DOMove(endPosition, 1.5f).SetDelay(Random.Range(0.5f, 1.5f)).SetEase(Ease.OutExpo).OnComplete(() => brick.transform.position = endPosition);
+    }
+
+    private void SpawnSacle(Transform brick)
+    {
+        Vector3 endScale = brick.localScale;
+        brick.transform.localScale = Vector3.zero;
+        brick.transform.DOScale(endScale, 1.5f).SetDelay(Random.Range(0.5f, 1.5f)).SetEase(Ease.OutElastic).OnComplete(() => brick.transform.localScale = endScale);
+    }
+
 
     public void Clean(LevelManager levelManager)
     {

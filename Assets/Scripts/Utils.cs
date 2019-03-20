@@ -21,14 +21,14 @@ public static class Utils
         return prefabs;
     }
 
-    public static List<Material> GetBackGroundMaterialsAtPath(string prefab)
+    public static List<Sprite> GetBackGroundMaterialsAtPath(string prefab)
     {
-        string[] prefabsGUIDs = AssetDatabase.FindAssets("t:Material", new string[] { prefab });
-        List<Material> materials = new List<Material>();
+        string[] prefabsGUIDs = AssetDatabase.FindAssets("t:Sprite", new string[] { prefab });
+        List<Sprite> materials = new List<Sprite>();
 
         foreach (string prefabGUID in prefabsGUIDs)
         {
-            materials.Add((Material)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(prefabGUID), typeof(Material)));
+            materials.Add((Sprite)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(prefabGUID), typeof(Sprite)));
         }
 
         return materials;
