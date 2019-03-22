@@ -88,6 +88,7 @@ public class BallController : MonoBehaviour
                     {
                         Vector3 center = collider.bounds.center;
                         newDirection.x += center.x > hit.point.x ? -deviation : deviation;
+                        _paddle.PaddlePunch();
                     }
                     break;
                 case "Brick":

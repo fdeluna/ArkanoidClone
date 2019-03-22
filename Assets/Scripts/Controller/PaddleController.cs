@@ -24,11 +24,13 @@ public class PaddleController : MonoBehaviour
     private Tweener _currentTween;
 
     private Transform _gun;
+    private Transform _sprite;
 
     private void Awake()
     {
         _initPosition = transform.position;
         _gun = transform.Find("Gun");
+        _sprite = transform.Find("Sprite");
         _rigidBody = GetComponent<Rigidbody2D>();
         InitScale = transform.localScale;
     }
@@ -37,9 +39,10 @@ public class PaddleController : MonoBehaviour
     {
         // TODO CHANGE TO MOUSE
         Vector2 direction = Vector3.right * Input.GetAxis("Horizontal");
-        Vector2 paddlePos = _rigidBody.position + direction * speed * Time.deltaTime;
+        Vector2 paddlePos = transform.position.ToVector2() + direction * speed * Time.deltaTime;
         paddlePos.x += Random.Range(-_randomnessMove, _randomnessMove);
-        _rigidBody.MovePosition(paddlePos);
+        transform.position = paddlePos;
+        //_rigidBody.MovePosition(paddlePos);
     }
 
     public void Reset()
@@ -50,6 +53,10 @@ public class PaddleController : MonoBehaviour
         _randomnessMove = 0;
     }
 
+    public void PaddlePunch()
+    {
+        _sprite.DOPunchPosition(Vector3.down, 0.3f).SetEase(Ease.InOutExpo).OnComplete(() => _sprite.localPosition = Vector3.zero);
+    }
 
     #region Power Ups
 
@@ -82,6 +89,7 @@ public class PaddleController : MonoBehaviour
 
     public void EnableGun()
     {
+        _gun.gameObject.SetActive(true);
         _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));
     }
 
@@ -89,7 +97,7 @@ public class PaddleController : MonoBehaviour
     {
         if (_fire)
         {
-            _gun.DOLocalMoveY(0, 0.75f).SetEase(Ease.OutBounce).SetAutoKill(true);
+            _gun.DOLocalMoveY(0, 0.75f).SetEase(Ease.OutBounce).SetAutoKill(true).OnComplete(() => _gun.gameObject.SetActive(false));
             _fire = false;
         }
     }
