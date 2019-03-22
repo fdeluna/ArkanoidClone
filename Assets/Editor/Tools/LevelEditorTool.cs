@@ -16,6 +16,7 @@ public class LevelEditorTool
             {
                 _levelInfo = value;
                 _grid = new LevelGrid(_levelInfo);
+                LoadEditor();
             }
         }
     }
@@ -70,7 +71,7 @@ public class LevelEditorTool
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
         _selectedBackgroundMaterialIndex = EditorPrefs.GetInt("_selectedBackgroundMaterialIndex", -1);
 
-        LevelBricks = new GameObject[_levelInfo.LevelData.LevelWidth * _levelInfo.LevelData.LevelHeight];
+        LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
         LoadEditor();
     }
 
@@ -83,9 +84,11 @@ public class LevelEditorTool
 
     public void LoadEditor()
     {
+        Debug.Log("Load Level");
         if (_levelInfo.LevelData != null)
         {
-            LevelBricks = new GameObject[_levelInfo.LevelData.LevelWidth * _levelInfo.LevelData.LevelHeight];
+            Debug.Log(_levelInfo.LevelData.name);
+            LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
 
             foreach (BrickPosition brickPosition in _levelInfo.LevelData.LevelBricks)
             {
@@ -95,7 +98,7 @@ public class LevelEditorTool
                 go.transform.parent = _levelInfo.Bricks;
 
                 Vector2Int gridPosition = _grid.WorldPositionToGrid(brickPosition.Position);
-                LevelBricks[gridPosition.x + gridPosition.y * _levelInfo.LevelData.LevelWidth] = go;
+                LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth] = go;
             }
             ChangeBackground(_levelInfo.LevelData.BackgroundSprite);
         }
@@ -122,7 +125,7 @@ public class LevelEditorTool
             Vector3 worldPosition = _grid.MousePositionToWorldPosition(mousePosition);
             if (EraseMode)
             {
-                EditorToolsUtils.DrawRectangle(worldPosition, _levelInfo.LevelData.BrickWidth, _levelInfo.LevelData.BrickHeight, new Color32(255, 77, 77, 70), Color.black);
+                EditorToolsUtils.DrawRectangle(worldPosition, LevelData.BrickWidth, LevelData.BrickHeight, new Color32(255, 77, 77, 70), Color.black);
             }
             else if (_selectedPrefab != null)
             {
@@ -163,7 +166,7 @@ public class LevelEditorTool
             GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
             brickAtPosition.transform.parent = _levelInfo.Bricks;
             brickAtPosition.transform.position = _grid.MousePositionToWorldPosition(mousePosition);
-            LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelInfo.LevelData.LevelWidth] = brickAtPosition;
+            LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth] = brickAtPosition;
         }
     }
 
@@ -173,9 +176,9 @@ public class LevelEditorTool
 
         Vector2 gridPosition = _grid.MousePositionToGridPosition(position);
 
-        if (LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelInfo.LevelData.LevelWidth] != null)
+        if (LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth] != null)
         {
-            brick = LevelBricks[(int)gridPosition.x + (int)gridPosition.y * _levelInfo.LevelData.LevelWidth];
+            brick = LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth];
         }
         return brick;
     }

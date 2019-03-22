@@ -1,25 +1,25 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-public class LevelGrid 
+public class LevelGrid
 {
-    private  LevelManager _levelInfo;
+    private LevelManager _levelInfo;
     private Vector3 _offSetPosition;
 
     public LevelGrid(LevelManager levelManager)
     {
         _levelInfo = levelManager;
-        _offSetPosition = new Vector3(_levelInfo.transform.position.x + _levelInfo.LevelData.BrickWidth / 2, _levelInfo.transform.position.y - _levelInfo.LevelData.BrickHeight / 2);
+        _offSetPosition = new Vector3(_levelInfo.transform.position.x + LevelData.BrickWidth / 2, _levelInfo.transform.position.y - LevelData.BrickHeight / 2);
     }
 
     public void DrawGrid()
     {
-        for (int x = 0; x < _levelInfo.LevelData.LevelWidth; x++)
+        for (int x = 0; x < LevelData.LevelWidth; x++)
         {
-            for (int y = 0; y < _levelInfo.LevelData.LevelHeight; y++)
+            for (int y = 0; y < LevelData.LevelHeight; y++)
             {
-                Vector3 pos = new Vector3(_offSetPosition.x + x * _levelInfo.LevelData.BrickWidth, _offSetPosition.y - y * _levelInfo.LevelData.BrickHeight);
-                EditorToolsUtils.DrawRectangle(pos, _levelInfo.LevelData.BrickWidth, _levelInfo.LevelData.BrickHeight, Color.clear, Color.white);
+                Vector3 pos = new Vector3(_offSetPosition.x + x * LevelData.BrickWidth, _offSetPosition.y - y * LevelData.BrickHeight);
+                EditorToolsUtils.DrawRectangle(pos, LevelData.BrickWidth, LevelData.BrickHeight, Color.clear, Color.white);
             }
         }
     }
@@ -41,8 +41,8 @@ public class LevelGrid
 
     public Vector2Int WorldPositionToGrid(Vector3 worldPosition)
     {
-        int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / _levelInfo.LevelData.BrickWidth, 0, _levelInfo.LevelData.LevelWidth - 1));
-        int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / _levelInfo.LevelData.BrickHeight, 0, _levelInfo.LevelData.LevelHeight - 1));
+        int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / LevelData.BrickWidth, 0, LevelData.LevelWidth - 1));
+        int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / LevelData.BrickHeight, 0, LevelData.LevelHeight - 1));
 
         return new Vector2Int(x, y);
     }
@@ -50,9 +50,9 @@ public class LevelGrid
     public Vector3 GridToWorldPosition(Vector2 gridPosition)
     {
         Vector3 pos = new Vector3
-        {            
-            x = _levelInfo.transform.position.x + (gridPosition.x * _levelInfo.LevelData.BrickWidth + _levelInfo.LevelData.BrickWidth / 2.0f),
-            y = _levelInfo.transform.position.y - (gridPosition.y * _levelInfo.LevelData.BrickHeight + _levelInfo.LevelData.BrickHeight / 2.0f)
+        {
+            x = _levelInfo.transform.position.x + (gridPosition.x * LevelData.BrickWidth + LevelData.BrickWidth / 2.0f),
+            y = _levelInfo.transform.position.y - (gridPosition.y * LevelData.BrickHeight + LevelData.BrickHeight / 2.0f)
         };
 
         return pos;

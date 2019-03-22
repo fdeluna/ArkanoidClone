@@ -8,10 +8,10 @@ public class LevelData : ScriptableObject
     enum SpawnAnimation { TopDown, LeftRight, Scale };
 
 
-    public readonly int LevelHeight = 14;
-    public readonly int LevelWidth = 16;
-    public readonly float BrickHeight = 0.5f;
-    public readonly float BrickWidth = 1;
+    public static readonly int LevelHeight = 14;
+    public static readonly int LevelWidth = 16;
+    public static readonly float BrickHeight = 0.5f;
+    public static readonly float BrickWidth = 1;
 
     public Sprite BackgroundSprite;
     public AudioClip BackgroundMusic;
