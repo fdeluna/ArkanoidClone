@@ -71,7 +71,7 @@ public class LevelEditorTool
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
         _selectedBackgroundMaterialIndex = EditorPrefs.GetInt("_selectedBackgroundMaterialIndex", -1);
 
-        LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
+        
         LoadEditor();
     }
 

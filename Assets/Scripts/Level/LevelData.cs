@@ -17,7 +17,7 @@ public class LevelData : ScriptableObject
     public AudioClip BackgroundMusic;
     public LevelData NextLevel;
 
-    [HideInInspector]
+    
     public List<BrickPosition> LevelBricks = new List<BrickPosition>();
 
     [Range(0, 1)]
