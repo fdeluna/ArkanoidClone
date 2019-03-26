@@ -43,8 +43,7 @@ public class LevelData : ScriptableObject
                     this.LevelBricks.Add(brickPosion);
                 }
             }
-        }
-        AssetDatabase.SaveAssets();
+        }        
     }
 
     public int Load(LevelManager levelManager)

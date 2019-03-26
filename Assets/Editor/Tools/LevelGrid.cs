@@ -8,12 +8,12 @@ public class LevelGrid
 
     public LevelGrid(LevelManager levelManager)
     {
-        _levelInfo = levelManager;
-        _offSetPosition = new Vector3(_levelInfo.transform.position.x + LevelData.BrickWidth / 2, _levelInfo.transform.position.y - LevelData.BrickHeight / 2);
+        _levelInfo = levelManager;        
     }
 
     public void DrawGrid()
     {
+        _offSetPosition = new Vector3(_levelInfo.transform.position.x + LevelData.BrickWidth / 2, _levelInfo.transform.position.y - LevelData.BrickHeight / 2);
         for (int x = 0; x < LevelData.LevelWidth; x++)
         {
             for (int y = 0; y < LevelData.LevelHeight; y++)

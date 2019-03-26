@@ -41,62 +41,66 @@ public class LevelManagerEditor : Editor
 
     private void InitEditorProperties()
     {
-        // properties
         _levelDataProperty = serializedObject.FindProperty("LevelData");
-        _levelDataSerializedObject = new SerializedObject(_levelDataProperty.objectReferenceValue);
-        _nextLevelDataProperty = _levelDataSerializedObject.FindProperty("NextLevel");
-        _powerUpChance = _levelDataSerializedObject.FindProperty("PowerUpChance");
-        _powerUpsList = _levelDataSerializedObject.FindProperty("PowerUpsProbability");
+        if (_levelDataProperty.objectReferenceValue != null)
+        {
+            _levelDataSerializedObject = new SerializedObject(_levelDataProperty.objectReferenceValue);
+            _nextLevelDataProperty = _levelDataSerializedObject.FindProperty("NextLevel");
+            _powerUpChance = _levelDataSerializedObject.FindProperty("PowerUpChance");
+            _powerUpsList = _levelDataSerializedObject.FindProperty("PowerUpsProbability");            
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 
     public override void OnInspectorGUI()
     {
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_levelDataProperty);
-        EditorGUILayout.PropertyField(_nextLevelDataProperty);
-
         if (EditorGUI.EndChangeCheck())
         {
-            _levelDataSerializedObject.ApplyModifiedProperties();
-            serializedObject.ApplyModifiedProperties();
             _edit = false;
             _target.Bricks.ClearChildrens();
-            _paintTool.LoadEditor();
             InitEditorProperties();
+            _paintTool.LoadEditor();
+            
         }
 
-        if (_edit)
+        if (_levelDataProperty.objectReferenceValue != null)
         {
-            PowerUpsEditor();
-            if (GUILayout.Button("Clear"))
-            {
-                _target.Bricks.ClearChildrens();
-            }
+            EditorGUILayout.PropertyField(_nextLevelDataProperty);
 
-            if (GUILayout.Button("Save"))
+            if (_edit)
             {
-                EditorUtility.SetDirty(_target);
-                _edit = false;
-                EditorPrefs.DeleteKey("edit");
-                Tools.current = Tool.View;
-                SceneView.onSceneGUIDelegate -= HandleMouseEvents;
-                _paintTool.Reset();
-                _target.LevelData.Save(_paintTool.LevelBricks);
+                PowerUpsEditor();
+                if (GUILayout.Button("Clear"))
+                {
+                    _target.Bricks.ClearChildrens();
+                }
+
+                if (GUILayout.Button("Save"))
+                {
+                    _edit = false;
+                    EditorPrefs.DeleteKey("edit");
+                    Tools.current = Tool.View;
+                    SceneView.onSceneGUIDelegate -= HandleMouseEvents;
+                    _paintTool.Reset();
+                    _target.LevelData.Save(_paintTool.LevelBricks);
+                    EditorUtility.SetDirty(_target);
+                    EditorUtility.SetDirty(_target.LevelData);
+                    serializedObject.ApplyModifiedProperties();
+                }
+            }
+            else
+            {
+                if (GUILayout.Button("Edit"))
+                {
+                    _edit = true;
+                    Tools.current = Tool.None;
+                    SceneView.onSceneGUIDelegate += HandleMouseEvents;
+                    SceneView.RepaintAll();
+                }
             }
         }
-        else
-        {
-            if (GUILayout.Button("Edit"))
-            {
-                _edit = true;
-                _paintTool.Reset();
-                Tools.current = Tool.None;
-                SceneView.onSceneGUIDelegate += HandleMouseEvents;
-                SceneView.RepaintAll();
-            }
-        }
-        _levelDataSerializedObject.ApplyModifiedProperties();
-        serializedObject.ApplyModifiedProperties();
     }
 
     private void OnSceneGUI()

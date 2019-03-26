@@ -7,20 +7,7 @@ public class LevelEditorTool
     // Level Bricks
     public GameObject[] LevelBricks;
 
-    // Properties
-    public LevelManager LevelInfo
-    {
-        set
-        {
-            if (value != null)
-            {
-                _levelInfo = value;
-                _grid = new LevelGrid(_levelInfo);
-                LoadEditor();
-            }
-        }
-    }
-
+    // Properties  
     private LevelManager _levelInfo;
 
     private bool EraseMode
@@ -64,14 +51,14 @@ public class LevelEditorTool
 
     public LevelEditorTool(LevelManager levelManager)
     {
-        LevelInfo = levelManager;
+        _levelInfo = levelManager;
 
+        _grid = new LevelGrid(_levelInfo);
         _bricksPrefabs = Utils.GetPrefabsAtPath(Utils.BRICKS_PATH);
         _backGroundMaterials = Utils.GetBackGroundMaterialsAtPath(Utils.BACKGROUND_MATERIALS_PATH);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
         _selectedBackgroundMaterialIndex = EditorPrefs.GetInt("_selectedBackgroundMaterialIndex", -1);
 
-        
         LoadEditor();
     }
 
