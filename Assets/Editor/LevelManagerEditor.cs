@@ -61,8 +61,7 @@ public class LevelManagerEditor : Editor
             _edit = false;
             _target.Bricks.ClearChildrens();
             InitEditorProperties();
-            _paintTool.LoadEditor();
-            
+            _paintTool.LoadEditor();            
         }
 
         if (_levelDataProperty.objectReferenceValue != null)
