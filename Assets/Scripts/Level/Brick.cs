@@ -2,7 +2,7 @@
 
 public class Brick : MonoBehaviour
 {
-    public enum BrickType { DESTRUCTIBLE, INDESTRUTIBLE}
+    public enum BrickType { DESTRUCTIBLE, INDESTRUTIBLE }
 
     public BrickType bricktype = BrickType.DESTRUCTIBLE;
     [SerializeField] int hitsToDestroy = 1;
@@ -12,20 +12,20 @@ public class Brick : MonoBehaviour
 
     public void Hit()
     {
-        hitsToDestroy--;
-
-        if (hitsToDestroy <= 0)
+        if (bricktype == BrickType.DESTRUCTIBLE)
         {
-            Destroy();
+            hitsToDestroy--;
+
+            if (hitsToDestroy <= 0)
+            {
+                Destroy();
+            }
         }
     }
 
     void Destroy()
     {
-        if (OnBrickDestroyed != null)
-            OnBrickDestroyed(this);
-
+        OnBrickDestroyed?.Invoke(this);
         Destroy(this.gameObject);
     }
-
 }

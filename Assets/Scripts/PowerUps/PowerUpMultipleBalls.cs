@@ -4,7 +4,7 @@
 
     public override void ApplyPowerUp()
     {
-        GameManager.Instance.LevelManager.TotalBalls += 5;
+        GameManager.Instance.ArkanoidManager.TotalBalls += 5;
         for (int i = 0; i < balls; i++)
         {
             _ball.InstantiateBall(_ball.transform.position);

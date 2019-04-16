@@ -2,9 +2,7 @@
 
 public class GameManager : MonoBehaviour
 {
-    public LevelManager LevelManager;    
-    public static int totalBricks = 0;
-
+    #region Singleton
     public static GameManager Instance
     {
         get
@@ -31,23 +29,38 @@ public class GameManager : MonoBehaviour
         }
     }
     private static GameManager _instance;
+    #endregion
+
+    public ArkanoidManager ArkanoidManager;
+    public static int totalBricks = 0;
+
+    public enum GameState { Start, LoadGame, Playing, PlayerDead, GameOver };
+
+    public GameState CurrentState
+    {
+        set
+        {
+            _currentState = value;
+            OnGameStateChanged?.Invoke(_currentState);
+        }
+        get
+        {
+            return _currentState;
+        }
+    }
+    private GameState _currentState;
+
+    public delegate void GameStateChanged(GameState state);
+    public static event GameStateChanged OnGameStateChanged;
 
     private void Awake()
     {
-        LevelManager = FindObjectOfType<LevelManager>();        
+        ArkanoidManager = FindObjectOfType<ArkanoidManager>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        LevelManager.LoadLevel();
+        CurrentState = GameState.Start;
     }
-
-    public void LoadLevel()
-    {
-        LevelManager.LoadLevel();
-    }
-    
-
-
 
 }

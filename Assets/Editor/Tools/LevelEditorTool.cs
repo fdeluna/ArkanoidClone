@@ -8,7 +8,7 @@ public class LevelEditorTool
     public GameObject[] LevelBricks;
 
     // Properties  
-    private LevelManager _levelInfo;
+    private ArkanoidManager _arkanoidManager;
 
     private bool EraseMode
     {
@@ -49,11 +49,11 @@ public class LevelEditorTool
     private Material _selectedBackgrounMaterial;
     #endregion
 
-    public LevelEditorTool(LevelManager levelManager)
+    public LevelEditorTool(ArkanoidManager arkanoidManager)
     {
-        _levelInfo = levelManager;
+        _arkanoidManager = arkanoidManager;
 
-        _grid = new LevelGrid(_levelInfo);
+        _grid = new LevelGrid(_arkanoidManager);
         _bricksPrefabs = Utils.GetPrefabsAtPath(Utils.BRICKS_PATH);
         _backGroundMaterials = Utils.GetBackGroundMaterialsAtPath(Utils.BACKGROUND_MATERIALS_PATH);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
@@ -72,22 +72,22 @@ public class LevelEditorTool
     public void LoadEditor()
     {
         Debug.Log("Load Level");
-        if (_levelInfo.LevelData != null)
+        if (_arkanoidManager.LevelData != null && !EditorApplication.isPlaying)
         {
-            Debug.Log(_levelInfo.LevelData.name);
+            Debug.Log(_arkanoidManager.LevelData.name);
             LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
 
-            foreach (BrickPosition brickPosition in _levelInfo.LevelData.LevelBricks)
+            foreach (BrickPosition brickPosition in _arkanoidManager.LevelData.LevelBricks)
             {
                 GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/" + brickPosition.PrefabName + ".prefab", typeof(GameObject)) as GameObject;
                 GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 go.transform.position = brickPosition.Position;
-                go.transform.parent = _levelInfo.Bricks;
+                go.transform.parent = _arkanoidManager.Bricks;
 
                 Vector2Int gridPosition = _grid.WorldPositionToGrid(brickPosition.Position);
                 LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth] = go;
             }
-            ChangeBackground(_levelInfo.LevelData.BackgroundSprite);
+            ChangeBackground(_arkanoidManager.LevelData.BackgroundSprite);
         }
     }
 
@@ -107,7 +107,7 @@ public class LevelEditorTool
 
     public void OnMouseMove(Vector3 mousePosition)
     {
-        if (Selection.activeTransform == _levelInfo.transform)
+        if (Selection.activeTransform == _arkanoidManager.transform)
         {
             Vector3 worldPosition = _grid.MousePositionToWorldPosition(mousePosition);
             if (EraseMode)
@@ -151,7 +151,7 @@ public class LevelEditorTool
         {
             Vector2 gridPosition = _grid.MousePositionToGridPosition(mousePosition);
             GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-            brickAtPosition.transform.parent = _levelInfo.Bricks;
+            brickAtPosition.transform.parent = _arkanoidManager.Bricks;
             brickAtPosition.transform.position = _grid.MousePositionToWorldPosition(mousePosition);
             LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth] = brickAtPosition;
         }
@@ -189,7 +189,7 @@ public class LevelEditorTool
             _currentPrefabIndex = index;
             GameObject.DestroyImmediate(_selectedPrefab);
             _selectedPrefab = PrefabUtility.InstantiatePrefab(_bricksPrefabs[index]) as GameObject;
-            _selectedPrefab.transform.parent = _levelInfo.transform;
+            _selectedPrefab.transform.parent = _arkanoidManager.transform;
             _selectedPrefab.hideFlags = HideFlags.HideInHierarchy;
             _selectedPrefab.layer = LayerMask.NameToLayer("Ignore Raycast");
         }
@@ -215,8 +215,8 @@ public class LevelEditorTool
 
     private void ChangeBackground(Sprite backgroundSprite)
     {
-        _levelInfo.LevelData.BackgroundSprite = backgroundSprite;
-        _levelInfo.Background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
+        _arkanoidManager.LevelData.BackgroundSprite = backgroundSprite;
+        _arkanoidManager.Background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
     }
 
     #endregion

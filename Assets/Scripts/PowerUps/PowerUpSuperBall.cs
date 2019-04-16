@@ -6,6 +6,6 @@ public class PowerUpSuperBall : PowerUp
 {
     public override void ApplyPowerUp()
     {
-        _ball.IsSuperBall = true;
+        _ball.SuperBall = true;
     }
 }

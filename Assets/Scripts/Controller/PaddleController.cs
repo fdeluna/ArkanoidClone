@@ -2,10 +2,17 @@
 using System.Collections;
 using UnityEngine;
 
-public class PaddleController : MonoBehaviour
+public class PaddleController : ArkanoidObject
 {
+    [Header("Stats")]
     [SerializeField]
-    float speed = 2.5f;
+    float speed = 5f;
+    public int Lifes = 3;
+
+    [Header("Ball")]
+    [SerializeField]
+    GameObject Ball;
+    [Header("Gun")]
     [SerializeField]
     float fireRate = 0.35f;
     [SerializeField]
@@ -19,6 +26,7 @@ public class PaddleController : MonoBehaviour
 
     private Rigidbody2D _rigidBody;
     private bool _fire = false;
+    private bool _move = false;
     private float _randomnessMove = 0;
     private Vector3 _initPosition;
     private Tweener _currentTween;
@@ -26,23 +34,57 @@ public class PaddleController : MonoBehaviour
     private Transform _gun;
     private Transform _sprite;
 
-    private void Awake()
+    private void Start()
     {
         _initPosition = transform.position;
+        InitScale = transform.localScale;
+        transform.localScale = Vector3.zero;
         _gun = transform.Find("Gun");
         _sprite = transform.Find("Sprite");
         _rigidBody = GetComponent<Rigidbody2D>();
-        InitScale = transform.localScale;
     }
 
-    void FixedUpdate()
+    private void Update()
     {
-        // TODO CHANGE TO MOUSE
-        Vector2 direction = Vector3.right * Input.GetAxis("Horizontal");
-        Vector2 paddlePos = transform.position.ToVector2() + direction * speed * Time.deltaTime;
-        paddlePos.x += Random.Range(-_randomnessMove, _randomnessMove);
-        transform.position = paddlePos;
-        //_rigidBody.MovePosition(paddlePos);
+        if (_move)
+        {
+            Vector2 direction = Vector3.right * Input.GetAxis("Horizontal");
+            Vector2 paddlePos = transform.position.ToVector2() + direction * speed * Time.deltaTime;
+            paddlePos.x += Random.Range(-_randomnessMove, _randomnessMove);
+            transform.position = paddlePos;
+            //_rigidBody.MovePosition(paddlePos);
+        }
+    }
+
+    public void PaddleSpawn()
+    {
+        Reset();
+        transform.localScale = Vector3.zero;
+        transform.DOScale(InitScale, 1f).SetEase(Ease.InOutElastic).SetDelay(1f);
+        Vector3 ballPosition = transform.localPosition;
+        ballPosition.y += 0.5f;
+        PoollingPrefabManager.Instance.GetPooledPrefab(Ball, ballPosition);
+    }
+
+    public void PaddleDead()
+    {
+        _move = false;
+        // TODO DESTROY EFFECT
+        // AFTER EFFECTS
+        transform.DOScale(Vector3.zero, 1f).SetEase(Ease.InOutElastic).OnComplete(() =>
+        {
+            if (Lifes > 0)
+            {
+                PaddleSpawn();
+                GameManager.Instance.CurrentState = GameManager.GameState.Playing;
+            }
+            else
+            {
+                GameManager.Instance.CurrentState = GameManager.GameState.GameOver;
+            }
+        });
+        transform.localScale = Vector3.zero;
+
     }
 
     public void Reset()
@@ -118,6 +160,32 @@ public class PaddleController : MonoBehaviour
             yield return null;
         }
     }
-
     #endregion
+
+
+    protected override void OnGameStateChanged(GameManager.GameState state)
+    {
+        switch (state)
+        {
+            case GameManager.GameState.Start:
+                gameObject.SetActive(false);
+                break;
+            case GameManager.GameState.LoadGame:
+                gameObject.SetActive(true);
+                PaddleSpawn();
+                break;
+            case GameManager.GameState.Playing:
+                _move = true;
+                break;
+            case GameManager.GameState.PlayerDead:
+                PaddleDead();
+                break;
+            case GameManager.GameState.GameOver:
+                gameObject.SetActive(false);
+                GameManager.Instance.CurrentState = GameManager.GameState.Start;
+                break;
+            default:
+                break;
+        }
+    }
 }

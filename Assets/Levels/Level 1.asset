@@ -12,56 +12,298 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d30a176751769348bd70489e6c77906, type: 3}
   m_Name: Level 1
   m_EditorClassIdentifier: 
-  BackgroundSprite: {fileID: 21300000, guid: b67f5b495b4a6dd4fb4c96622e783e1c, type: 3}
+  BackgroundSprite: {fileID: 21300000, guid: 6a9cd09fba317c24894177620fbbd503, type: 3}
   BackgroundMusic: {fileID: 0}
   NextLevel: {fileID: 0}
   LevelBricks:
-  - Position: {x: -7.5, y: 4.25, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -7.5, y: 3.75, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -7.5, y: 3.25, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -7.5, y: 2.75, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -7.5, y: -1.25, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -7.5, y: -1.75, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -7.5, y: -2.25, z: 0}
-    PrefabName: Dark Blue Brick
-  - Position: {x: -6.5, y: 4.25, z: 0}
+  - Position: {x: 0.5, y: -1.25, z: 0}
     PrefabName: Grey Brick
-  - Position: {x: -6.5, y: 3.75, z: 0}
-    PrefabName: Grey Brick
-  - Position: {x: -6.5, y: 3.25, z: 0}
-    PrefabName: Grey Brick
-  - Position: {x: -6.5, y: -1.25, z: 0}
-    PrefabName: Grey Brick
-  - Position: {x: -6.5, y: -1.75, z: 0}
-    PrefabName: Grey Brick
-  - Position: {x: -6.5, y: -2.25, z: 0}
-    PrefabName: Grey Brick
-  - Position: {x: -5.5, y: 4.25, z: 0}
+  - Position: {x: 0.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 0.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 0.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 0.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 0.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 0.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 0.5, y: -4.75, z: 0}
     PrefabName: Red Brick
-  - Position: {x: -5.5, y: 3.75, z: 0}
+  - Position: {x: 0.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 1.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 1.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 1.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 1.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 1.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 1.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 1.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 1.5, y: -4.75, z: 0}
     PrefabName: Red Brick
-  - Position: {x: -5.5, y: 3.25, z: 0}
+  - Position: {x: 1.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 2.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 2.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 2.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 2.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 2.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 2.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 2.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 2.5, y: -4.75, z: 0}
     PrefabName: Red Brick
-  - Position: {x: -5.5, y: -0.75, z: 0}
+  - Position: {x: 2.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 3.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 3.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 3.5, y: -2.25, z: 0}
     PrefabName: Green Brick
-  - Position: {x: -3.5, y: -0.25, z: 0}
+  - Position: {x: 3.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 3.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 3.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 3.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 3.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 3.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 4.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 4.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 4.5, y: -2.25, z: 0}
     PrefabName: Green Brick
-  - Position: {x: -3.5, y: -0.75, z: 0}
+  - Position: {x: 4.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 4.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 4.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 4.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 4.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 4.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 5.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 5.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 5.5, y: -2.25, z: 0}
     PrefabName: Green Brick
-  - Position: {x: -2.5, y: -0.25, z: 0}
+  - Position: {x: 5.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 5.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 5.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 5.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 5.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 5.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 6.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 6.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 6.5, y: -2.25, z: 0}
     PrefabName: Green Brick
-  - Position: {x: -2.5, y: -0.75, z: 0}
+  - Position: {x: 6.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 6.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 6.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 6.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 6.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 6.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 7.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 7.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 7.5, y: -2.25, z: 0}
     PrefabName: Green Brick
-  - Position: {x: -1.5, y: -0.25, z: 0}
+  - Position: {x: 7.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 7.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 7.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 7.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 7.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 7.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 8.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 8.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 8.5, y: -2.25, z: 0}
     PrefabName: Green Brick
-  - Position: {x: 0.5, y: 2.25, z: 0}
+  - Position: {x: 8.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 8.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 8.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 8.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 8.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 8.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 9.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 9.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 9.5, y: -2.25, z: 0}
     PrefabName: Green Brick
+  - Position: {x: 9.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 9.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 9.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 9.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 9.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 9.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 10.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 10.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 10.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 10.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 10.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 10.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 10.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 10.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 10.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 11.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 11.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 11.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 11.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 11.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 11.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 11.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 11.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 11.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 12.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 12.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 12.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 12.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 12.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 12.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 12.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 12.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 12.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 13.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 13.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 13.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 13.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 13.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 13.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 13.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 13.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 13.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 14.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 14.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 14.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 14.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 14.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 14.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 14.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 14.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 14.5, y: -5.25, z: 0}
+    PrefabName: White Brick
+  - Position: {x: 15.5, y: -1.25, z: 0}
+    PrefabName: Grey Brick
+  - Position: {x: 15.5, y: -1.75, z: 0}
+    PrefabName: Light Green Brick
+  - Position: {x: 15.5, y: -2.25, z: 0}
+    PrefabName: Green Brick
+  - Position: {x: 15.5, y: -2.75, z: 0}
+    PrefabName: Blue Brick
+  - Position: {x: 15.5, y: -3.25, z: 0}
+    PrefabName: Purple Brick
+  - Position: {x: 15.5, y: -3.75, z: 0}
+    PrefabName: Orange Brick
+  - Position: {x: 15.5, y: -4.25, z: 0}
+    PrefabName: Yellow Brick
+  - Position: {x: 15.5, y: -4.75, z: 0}
+    PrefabName: Red Brick
+  - Position: {x: 15.5, y: -5.25, z: 0}
+    PrefabName: White Brick
   PowerUpChance: 0
   PowerUpsProbability:
   - powerUp: {fileID: 2268857596194413943, guid: a5139df195d77f640802470141ea2722,

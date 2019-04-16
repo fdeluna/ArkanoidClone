@@ -3,17 +3,17 @@ using UnityEngine;
 
 public class LevelGrid
 {
-    private LevelManager _levelInfo;
+    private ArkanoidManager _levelArkanoidManager;
     private Vector3 _offSetPosition;
 
-    public LevelGrid(LevelManager levelManager)
+    public LevelGrid(ArkanoidManager levelManager)
     {
-        _levelInfo = levelManager;        
+        _levelArkanoidManager = levelManager;        
     }
 
     public void DrawGrid()
     {
-        _offSetPosition = new Vector3(_levelInfo.transform.position.x + LevelData.BrickWidth / 2, _levelInfo.transform.position.y - LevelData.BrickHeight / 2);
+        _offSetPosition = new Vector3(_levelArkanoidManager.transform.position.x + LevelData.BrickWidth / 2, _levelArkanoidManager.transform.position.y - LevelData.BrickHeight / 2);
         for (int x = 0; x < LevelData.LevelWidth; x++)
         {
             for (int y = 0; y < LevelData.LevelHeight; y++)
@@ -51,8 +51,8 @@ public class LevelGrid
     {
         Vector3 pos = new Vector3
         {
-            x = _levelInfo.transform.position.x + (gridPosition.x * LevelData.BrickWidth + LevelData.BrickWidth / 2.0f),
-            y = _levelInfo.transform.position.y - (gridPosition.y * LevelData.BrickHeight + LevelData.BrickHeight / 2.0f)
+            x = _levelArkanoidManager.transform.position.x + (gridPosition.x * LevelData.BrickWidth + LevelData.BrickWidth / 2.0f),
+            y = _levelArkanoidManager.transform.position.y - (gridPosition.y * LevelData.BrickHeight + LevelData.BrickHeight / 2.0f)
         };
 
         return pos;

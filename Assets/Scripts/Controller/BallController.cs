@@ -1,19 +1,22 @@
 ﻿using DG.Tweening;
 using UnityEngine;
 
-public class BallController : MonoBehaviour
+public class BallController : ArkanoidObject
 {
+    #region movement
     [Range(4, 8)]
     [SerializeField] float speed;
     [SerializeField] float deviation = 0.3f;
+    #endregion
 
-    [HideInInspector]
+    #region Flags
     public bool Magnet = false;
-    [HideInInspector]
-    public bool IsLaunched = false;
-    [HideInInspector]
-    public bool IsSuperBall = false;
+    public bool SuperBall = false;
+    private bool _move = false;
+    private bool _isLaunched = false;
+    #endregion
 
+    #region Collisions
     private Vector3 _direction = new Vector2(0.15f, 1f);
     private float _contactPointX = 0;
     private PaddleController _paddle;
@@ -21,13 +24,20 @@ public class BallController : MonoBehaviour
     private Collider2D _collider2D;
     private bool _brickHitted = false;
     private int _layerMask;
+    #endregion
 
+    #region Effects
+    private float _instanceTime = 1f;
     private Tweener _scaleTweener;
     private Transform _sprite;
+    #endregion
+
+    #region events
     public delegate void BallDestroyed();
     public event BallDestroyed OnBallDestroyed;
+    #endregion
 
-    void Awake()
+    void Start()
     {
         _rigidBody = GetComponent<Rigidbody2D>();
         _collider2D = GetComponent<Collider2D>();
@@ -38,25 +48,31 @@ public class BallController : MonoBehaviour
 
     private void OnEnable()
     {
-        OnBallDestroyed -= GameManager.Instance.LevelManager.OnBallDestroyed;
-        OnBallDestroyed += GameManager.Instance.LevelManager.OnBallDestroyed;
+        Reset();
+        OnBallDestroyed -= GameManager.Instance.ArkanoidManager.OnBallDestroyed;
+        OnBallDestroyed += GameManager.Instance.ArkanoidManager.OnBallDestroyed;
+        transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutElastic).SetDelay(1.5f);
+        _move = false;
     }
 
     void Update()
     {
-        if (!IsLaunched)
+        if (_move)
         {
-            Vector3 position = !Magnet ? new Vector3(_paddle.transform.position.x, _paddle.transform.position.y + 0.5f) : new Vector3(_paddle.transform.position.x - _contactPointX, _paddle.transform.position.y + 0.5f);
-            _rigidBody.position = position;
-
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (!_isLaunched)
             {
-                IsLaunched = true;
+                Vector3 position = !Magnet ? new Vector3(_paddle.transform.position.x, _paddle.transform.position.y + 0.5f) : new Vector3(_paddle.transform.position.x - _contactPointX, _paddle.transform.position.y + 0.5f);
+                _rigidBody.position = position;
+
+                if (Input.GetKeyDown(KeyCode.Space))
+                {
+                    _isLaunched = true;
+                }
             }
-        }
-        else
-        {
-            MoveBall();
+            else
+            {
+                MoveBall();
+            }
         }
     }
 
@@ -81,7 +97,7 @@ public class BallController : MonoBehaviour
                     RaycastHit2D hit = Physics2D.Raycast(_rigidBody.position, _direction);
                     if (Magnet)
                     {
-                        IsLaunched = false;
+                        _isLaunched = false;
                         _contactPointX = _paddle.transform.position.x - hit.point.x;
                     }
                     else
@@ -97,7 +113,7 @@ public class BallController : MonoBehaviour
                         _brickHitted = true;
                         Brick brick = collider.GetComponent<Brick>();
                         brick.Hit();
-                        if (IsSuperBall)
+                        if (SuperBall)
                         {
                             _brickHitted = false;
                             newDirection = _direction;
@@ -117,7 +133,7 @@ public class BallController : MonoBehaviour
         transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
         if (_scaleTweener == null || !_scaleTweener.active)
         {
-            _scaleTweener = _sprite.DOPunchScale(Vector3.one * 3, 0.15f).SetEase(Ease.InExpo).SetAutoKill();
+            _scaleTweener = _sprite.DOPunchScale(Vector3.one * 0.25f, 0.15f).SetEase(Ease.InExpo).SetAutoKill();
         }
     }
 
@@ -128,7 +144,7 @@ public class BallController : MonoBehaviour
             if (OnBallDestroyed != null)
             {
                 OnBallDestroyed.Invoke();
-                OnBallDestroyed -= GameManager.Instance.LevelManager.OnBallDestroyed;
+                OnBallDestroyed -= GameManager.Instance.ArkanoidManager.OnBallDestroyed;
                 gameObject.SetActive(false);
                 Reset();
             }
@@ -138,23 +154,42 @@ public class BallController : MonoBehaviour
     public void Reset()
     {
         speed = 5;
-        IsLaunched = false;
+        _isLaunched = false;
         _direction = new Vector2(0.15f, 1f);
         ResetPowerUps();
+        transform.localScale = Vector3.zero;
     }
 
     #region Power Ups
     public void ResetPowerUps()
     {
         Magnet = false;
-        IsSuperBall = false;
+        SuperBall = false;
     }
 
     public void InstantiateBall(Vector3 postion)
     {
         BallController ball = PoollingPrefabManager.Instance.GetPooledPrefab(gameObject, postion).GetComponent<BallController>();
-        ball.IsLaunched = true;
+        ball._isLaunched = true;
         ball._direction = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+        ball._instanceTime = 0;
+    }
+
+    protected override void OnGameStateChanged(GameManager.GameState state)
+    {
+        switch (state)
+        {
+            case GameManager.GameState.Playing:
+                _move = true;
+                break;
+            case GameManager.GameState.PlayerDead:
+                //DOTween.KillAll();
+                gameObject.SetActive(false);
+                break;
+            case GameManager.GameState.GameOver:
+                gameObject.SetActive(false);
+                break;
+        }
     }
 
 
