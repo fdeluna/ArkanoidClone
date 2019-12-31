@@ -1,7 +1,10 @@
-﻿public class PowerUpGun : PowerUp
-{   
-    public override void ApplyPowerUp()
+﻿namespace PowerUps
+{
+    public class PowerUpGun : PowerUp
     {
-        _paddle.EnableGun();
+        protected override void ApplyPowerUp()
+        {
+            Paddle.EnableGun();
+        }
     }
 }

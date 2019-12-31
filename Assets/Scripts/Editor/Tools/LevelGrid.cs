@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using Level;
+using Manager;
+using UnityEditor;
 using UnityEngine;
 
 public class LevelGrid
@@ -32,17 +34,18 @@ public class LevelGrid
         return GridToWorldPosition(gridPosition);
     }
 
-    public Vector2 MousePositionToGridPosition(Vector3 mousePosition)
+    public Vector2Int MousePositionToGridPosition(Vector3 mousePosition)
     {
         Camera camera = SceneView.currentDrawingSceneView.camera;
         mousePosition.y = camera.pixelHeight - mousePosition.y;
+        
         return WorldPositionToGrid(camera.ScreenToWorldPoint(mousePosition));
     }
 
     public Vector2Int WorldPositionToGrid(Vector3 worldPosition)
-    {
-        int x = Mathf.RoundToInt(Mathf.Clamp((worldPosition.x - _offSetPosition.x) / LevelData.BrickWidth, 0, LevelData.LevelWidth - 1));
-        int y = Mathf.RoundToInt(Mathf.Clamp((-worldPosition.y + _offSetPosition.y) / LevelData.BrickHeight, 0, LevelData.LevelHeight - 1));
+    {                
+        int x = (int)(Mathf.Clamp((worldPosition.x ) / LevelData.BrickWidth, 0, LevelData.LevelWidth - 1));
+        int y = (int)(Mathf.Clamp((-worldPosition.y ) / LevelData.BrickHeight, 0, LevelData.LevelHeight - 1));
 
         return new Vector2Int(x, y);
     }

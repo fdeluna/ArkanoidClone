@@ -1,153 +1,141 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Controller;
+using Level;
+using PowerUps;
 using UnityEngine;
 
-[DisallowMultipleComponent]
-public class ArkanoidManager : ArkanoidObject
+namespace Manager
 {
-    #region Level Data
-    public LevelData LevelData;
-    static int totalBricks;
-
-    public Transform Bricks
+    [DisallowMultipleComponent]
+    public class ArkanoidManager : ArkanoidObject
     {
-        get
+        #region Level Data
+        public LevelData levelData;
+        static int totalBricks;
+
+        public Transform Bricks
         {
-            if (_bricks == null)
+            get
             {
-                _bricks = transform.Find("Bricks");
+                if (_bricks == null)
+                {
+                    _bricks = transform.Find("Bricks");
+                }
+                return _bricks;
             }
-            return _bricks;
         }
-    }
-    private Transform _bricks;
+        private Transform _bricks;
 
-    public Transform Background
-    {
-        get
+        public Transform Background
         {
-            if (_background == null)
+            get
             {
-                _background = transform.Find("Background");
+                if (_background == null)
+                {
+                    _background = transform.Find("Background");
+                }
+                return _background;
             }
-            return _background;
         }
-    }
-    private Transform _background;
-    #endregion
+        private Transform _background;
+        #endregion
 
-    #region Current Game
-    [HideInInspector]
-    public int TotalBalls = 1;
-    private List<PowerUpProbability> _levelPowerUps;
-    private PaddleController _paddle;
-    #endregion
+        #region Current Game
+        [HideInInspector]
+        public int totalBalls = 1;
+        private List<PowerUpProbability> _levelPowerUps;
+        private PaddleController _paddle;
+        #endregion
 
-    private void Start()
-    {
-        _paddle = FindObjectOfType<PaddleController>();
-        CleanLevel();
-    }
-
-    public void LoadLevel()
-    {
-        CleanLevel();
-        totalBricks = LevelData.Load(this, () => GameManager.Instance.CurrentState = GameManager.GameState.Playing);
-        _levelPowerUps = LevelData.PowerUpsProbability.Where(o => o.probability > 0).ToList();
-    }
-
-    public void CleanLevel()
-    {
-        LevelData.Clean(this);
-    }
-
-    public void LoadNextLevel()
-    {
-        LevelData = LevelData.NextLevel;
-        if (LevelData != null)
+        private void Start()
         {
-            LoadLevel();
+            _paddle = FindObjectOfType<PaddleController>();
+            CleanLevel();
         }
-    }
 
-    public void OnBrickDestroyed(Brick brick)
-    {
-        totalBricks--;
-        SpawnPowerUp(brick.transform.position);
-        if (totalBricks <= 0)
+        private void LoadLevel()
         {
+            CleanLevel();
+            totalBricks = levelData.Load(this, () => GameManager.Instance.CurrentState = GameManager.GameState.Playing);
+            _levelPowerUps = levelData.powerUpsProbability.Where(o => o.probability > 0).ToList();
+        }
+
+        private void CleanLevel()
+        {
+            LevelData.Clean(this);
+        }
+
+        private void LoadNextLevel()
+        {
+            levelData = levelData.nextLevel;
+            if (levelData != null)
+            {
+                LoadLevel();
+            }
+        }
+
+        public void OnBrickDestroyed(Brick brick)
+        {
+            totalBricks--;
+            SpawnPowerUp(brick.transform.position);
+            if (totalBricks > 0) return;
             Debug.Log("WIN");
             LoadNextLevel();
         }
-    }
 
-    public void OnBallDestroyed()
-    {
-        TotalBalls--;
-        if (TotalBalls <= 0)
+        public void OnBallDestroyed()
         {
-            _paddle.Lifes--;
-            if (_paddle.Lifes < 0)
-            {
-                GameManager.Instance.CurrentState = GameManager.GameState.GameOver;
-            }
-            else
-            {
-                GameManager.Instance.CurrentState = GameManager.GameState.PlayerDead;
-            }
+            totalBalls--;
+            if (totalBalls > 0) return;
+            _paddle.lives--;
+            GameManager.Instance.CurrentState = _paddle.lives < 0 ? GameManager.GameState.GameOver : GameManager.GameState.PlayerDead;
         }
-    }
 
-    private void SpawnPowerUp(Vector3 position)
-    {
-        if (TotalBalls == 1)
+        private void SpawnPowerUp(Vector3 position)
         {
-            if (Random.Range(0, 1f) <= LevelData.PowerUpChance)
+            if (totalBalls != 1) return;
+            if (!(Random.Range(0, 1f) <= levelData.powerUpChance)) return;
+            
+            var powerUp = GetRandomPowerUp();
+            while (powerUp == null)
             {
-                GameObject powerUp = GetRandomPowerUp();
-                while (powerUp == null)
-                {
-                    powerUp = GetRandomPowerUp();
-                }
-                PoollingPrefabManager.Instance.GetPooledPrefab(powerUp, position);
+                powerUp = GetRandomPowerUp();
             }
+            PoollingPrefabManager.Instance.GetPooledPrefab(powerUp, position);
         }
-    }
 
-    private GameObject GetRandomPowerUp()
-    {
-        GameObject powerUp = null;
-        float probability = Random.Range(0, 1f);
-
-        float totalProbability = 0;
-        foreach (PowerUpProbability pp in _levelPowerUps)
+        private GameObject GetRandomPowerUp()
         {
-            totalProbability += pp.probability;
-            if (probability < totalProbability)
+            GameObject powerUp = null;
+            var probability = Random.Range(0, 1f);
+
+            float totalProbability = 0;
+            foreach (var pp in _levelPowerUps)
             {
-                if (_paddle.CurrentPowerUp?.GetType() != pp.powerUp.GetComponent<PowerUp>().GetType() && _levelPowerUps.Count > 1)
+                totalProbability += pp.probability;
+                if (!(probability < totalProbability)) continue;
+                if (_paddle.currentPowerUp?.GetType() != pp.powerUp.GetComponent<PowerUp>().GetType() && _levelPowerUps.Count > 1)
                 {
                     powerUp = pp.powerUp;
                     break;
                 }
             }
+            return powerUp;
         }
-        return powerUp;
-    }
 
-    protected override void OnGameStateChanged(GameManager.GameState state)
-    {
-        switch (state)
+        protected override void OnGameStateChanged(GameManager.GameState state)
         {
-            case GameManager.GameState.LoadGame:
-                gameObject.SetActive(true);
-                LoadLevel();
-                break;
-            case GameManager.GameState.GameOver:                
-                CleanLevel();
-                break;
-            default:
-                break;
+            switch (state)
+            {
+                case GameManager.GameState.LoadGame:
+                    gameObject.SetActive(true);
+                    LoadLevel();
+                    break;
+                case GameManager.GameState.GameOver:                
+                    CleanLevel();
+                    break;
+            }
         }
     }
 }

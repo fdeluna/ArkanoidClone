@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2873269891699360403}
   - component: {fileID: 2873269891699360402}
   - component: {fileID: 2873269891699360405}
+  - component: {fileID: 81361877189737284}
   m_Layer: 11
   m_Name: Ball
   m_TagString: Untagged
@@ -46,11 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d246e675188cee4c8243d7abdef5204, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 4
-  deviation: 0.5
-  Magnet: 0
-  IsLaunched: 0
-  IsSuperBall: 0
+  speed: 0
+  deviation: 0.3
+  magnet: 0
+  superBall: 0
 --- !u!50 &2873269891699360402
 Rigidbody2D:
   serializedVersion: 4
@@ -79,7 +79,7 @@ BoxCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2873269891699360400}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Density: 1
   m_Material: {fileID: 0}
   m_IsTrigger: 0
@@ -98,6 +98,22 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.32, y: 0.32}
   m_EdgeRadius: 0
+--- !u!58 &81361877189737284
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2873269891699360400}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  serializedVersion: 2
+  m_Radius: 0.5
 --- !u!1 &8550076770605067823
 GameObject:
   m_ObjectHideFlags: 0
@@ -154,6 +170,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

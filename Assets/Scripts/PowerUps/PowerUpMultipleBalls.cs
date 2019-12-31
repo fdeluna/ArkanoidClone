@@ -1,13 +1,16 @@
-﻿public class PowerUpMultipleBalls : PowerUp
+﻿namespace PowerUps
 {
-    public int balls = 5;
-
-    public override void ApplyPowerUp()
+    public class PowerUpMultipleBalls : PowerUp
     {
-        GameManager.Instance.ArkanoidManager.TotalBalls += 5;
-        for (int i = 0; i < balls; i++)
+        public int balls = 5;
+
+        protected override void ApplyPowerUp()
         {
-            _ball.InstantiateBall(_ball.transform.position);
+            GameManager.Instance.ArkanoidManager.totalBalls += 5;
+            for (var i = 0; i < balls; i++)
+            {
+                Ball.InstantiateBall(Ball.transform.position);
+            }
         }
     }
 }

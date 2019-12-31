@@ -1,11 +1,14 @@
-﻿public class PowerUpGrow : PowerUp
+﻿namespace PowerUps
 {
-    public float IncreaseMultiply = 2;
-    protected enum Grow {Increase,Decrease};
-    protected Grow _growType;
+    public class PowerUpGrow : PowerUp
+    {
+        public float increaseMultiply = 2;
+        protected enum Grow {Increase,Decrease};
+        protected Grow GrowType;
 
-    public override void ApplyPowerUp()
-    {        
-        _paddle.ModifyScale(_growType == Grow.Increase ? _paddle.InitScale * IncreaseMultiply : _paddle.InitScale / IncreaseMultiply);
-    }    
+        protected override void ApplyPowerUp()
+        {        
+            Paddle.ModifyScale(GrowType == Grow.Increase ? Paddle.initScale * increaseMultiply : Paddle.initScale / increaseMultiply);
+        }    
+    }
 }

@@ -1,4 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
+using Level;
+using Manager;
 using UnityEditor;
 using UnityEngine;
 
@@ -54,8 +58,8 @@ public class LevelEditorTool
         _arkanoidManager = arkanoidManager;
 
         _grid = new LevelGrid(_arkanoidManager);
-        _bricksPrefabs = Utils.GetPrefabsAtPath(Utils.BRICKS_PATH);
-        _backGroundMaterials = Utils.GetBackGroundMaterialsAtPath(Utils.BACKGROUND_MATERIALS_PATH);
+        _bricksPrefabs = Utils.GetPrefabsAtPath(Utils.BricksPath);
+        _backGroundMaterials = Utils.GetBackGroundMaterialsAtPath(Utils.BackgroundMaterialsPath);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
         _selectedBackgroundMaterialIndex = EditorPrefs.GetInt("_selectedBackgroundMaterialIndex", -1);
 
@@ -66,28 +70,28 @@ public class LevelEditorTool
     {
         GameObject.DestroyImmediate(_selectedPrefab);
         EditorPrefs.DeleteKey("_selectedPrefabIndex");
-        _selectedPrefabIndex = -1;
+        _selectedPrefabIndex = 0;
     }
 
     public void LoadEditor()
     {
         Debug.Log("Load Level");
-        if (_arkanoidManager.LevelData != null && !EditorApplication.isPlaying)
+        if (_arkanoidManager.levelData != null && !EditorApplication.isPlaying)
         {
-            Debug.Log(_arkanoidManager.LevelData.name);
+            Debug.Log(_arkanoidManager.levelData.name);
             LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
 
-            foreach (BrickPosition brickPosition in _arkanoidManager.LevelData.LevelBricks)
+            foreach (BrickPosition brickPosition in _arkanoidManager.levelData.levelBricks)
             {
-                GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/" + brickPosition.PrefabName + ".prefab", typeof(GameObject)) as GameObject;
+                GameObject prefab = AssetDatabase.LoadAssetAtPath("Assets/Prefabs/Resources/Bricks/" + brickPosition.prefabName + ".prefab", typeof(GameObject)) as GameObject;
                 GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-                go.transform.position = brickPosition.Position;
+                go.transform.position = brickPosition.position;
                 go.transform.parent = _arkanoidManager.Bricks;
 
-                Vector2Int gridPosition = _grid.WorldPositionToGrid(brickPosition.Position);
+                Vector2Int gridPosition = _grid.WorldPositionToGrid(brickPosition.position);
                 LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth] = go;
             }
-            ChangeBackground(_arkanoidManager.LevelData.BackgroundSprite);
+            ChangeBackground(_arkanoidManager.levelData.backgroundSprite);
         }
     }
 
@@ -149,11 +153,12 @@ public class LevelEditorTool
 
         if (prefab != null)
         {
-            Vector2 gridPosition = _grid.MousePositionToGridPosition(mousePosition);
+            Vector3 worldPosition = _grid.MousePositionToWorldPosition(mousePosition);
+            Vector2Int gridPosition = _grid.WorldPositionToGrid(worldPosition);
             GameObject brickAtPosition = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
             brickAtPosition.transform.parent = _arkanoidManager.Bricks;
-            brickAtPosition.transform.position = _grid.MousePositionToWorldPosition(mousePosition);
-            LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth] = brickAtPosition;
+            brickAtPosition.transform.position = worldPosition;
+            LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth] = brickAtPosition;
         }
     }
 
@@ -161,11 +166,14 @@ public class LevelEditorTool
     {
         GameObject brick = null;
 
-        Vector2 gridPosition = _grid.MousePositionToGridPosition(position);
+        Vector2Int gridPosition = _grid.MousePositionToGridPosition(position);
+        Debug.Log(position);
+        Debug.Log(gridPosition);
+        Debug.Log(gridPosition.x + gridPosition.y * LevelData.LevelWidth);
 
-        if (LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth] != null)
+        if (LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth] != null)
         {
-            brick = LevelBricks[(int)gridPosition.x + (int)gridPosition.y * LevelData.LevelWidth];
+            brick = LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth];
         }
         return brick;
     }
@@ -176,7 +184,6 @@ public class LevelEditorTool
 
     private void DrawPrefabPreviewWindow(int windowID)
     {
-
         EditorToolsUtils.DrawScrollViewWindow(windowID, ref _paleteWindowPosition, ref _selectedPrefabIndex, _bricksPrefabs, _prefabPreviewWidth, _prefabPreviewHeight);
         EditorPrefs.SetInt("_selectedPrefabIndex", _selectedPrefabIndex);
         GetSelectedPrefab(_selectedPrefabIndex);
@@ -184,7 +191,7 @@ public class LevelEditorTool
 
     private void GetSelectedPrefab(int index)
     {
-        if (index != -1 && _currentPrefabIndex != index)
+        if (_selectedPrefab == null || _currentPrefabIndex != index)
         {
             _currentPrefabIndex = index;
             GameObject.DestroyImmediate(_selectedPrefab);
@@ -215,7 +222,7 @@ public class LevelEditorTool
 
     private void ChangeBackground(Sprite backgroundSprite)
     {
-        _arkanoidManager.LevelData.BackgroundSprite = backgroundSprite;
+        _arkanoidManager.levelData.backgroundSprite = backgroundSprite;
         _arkanoidManager.Background.GetComponent<SpriteRenderer>().sprite = backgroundSprite;
     }
 

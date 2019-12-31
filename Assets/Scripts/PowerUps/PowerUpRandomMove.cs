@@ -1,10 +1,13 @@
 ﻿
-public class PowerUpRandomMove : PowerUp
-{    
-    public float RandomnessStrength = 0.15f;
-        
-    public override void ApplyPowerUp()
-    {
-        _paddle.RandomMoves(RandomnessStrength);
+namespace PowerUps
+{
+    public class PowerUpRandomMove : PowerUp
+    {    
+        public float randomnessStrength = 0.15f;
+
+        protected override void ApplyPowerUp()
+        {
+            Paddle.RandomMoves(randomnessStrength);
+        }
     }
 }

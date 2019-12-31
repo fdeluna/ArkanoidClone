@@ -1,8 +1,11 @@
-﻿public class PowerUpIncrease : PowerUpGrow
-{    
-    public override void ApplyPowerUp()
+﻿namespace PowerUps
+{
+    public class PowerUpIncrease : PowerUpGrow
     {
-        _growType = Grow.Increase;
-        base.ApplyPowerUp();                  
-    }    
+        protected override void ApplyPowerUp()
+        {
+            GrowType = Grow.Increase;
+            base.ApplyPowerUp();                  
+        }    
+    }
 }

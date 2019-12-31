@@ -1,7 +1,10 @@
-﻿public class PowerUpMagnet : PowerUp
+﻿namespace PowerUps
 {
-    public override void ApplyPowerUp()
+    public class PowerUpMagnet : PowerUp
     {
-        _ball.Magnet = true;
+        protected override void ApplyPowerUp()
+        {
+            Ball.magnet = true;
+        }
     }
 }

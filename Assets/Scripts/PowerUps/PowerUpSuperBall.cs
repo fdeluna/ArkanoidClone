@@ -1,11 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class PowerUpSuperBall : PowerUp
+﻿namespace PowerUps
 {
-    public override void ApplyPowerUp()
+    public class PowerUpSuperBall : PowerUp
     {
-        _ball.SuperBall = true;
+        protected override void ApplyPowerUp()
+        {
+            Ball.superBall = true;
+        }
     }
 }
