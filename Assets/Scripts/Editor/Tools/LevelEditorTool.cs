@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
-using Level;
+﻿using Level;
 using Manager;
 using UnityEditor;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class LevelEditorTool
 {
@@ -58,7 +56,7 @@ public class LevelEditorTool
         _arkanoidManager = arkanoidManager;
 
         _grid = new LevelGrid(_arkanoidManager);
-        _bricksPrefabs = Utils.GetPrefabsAtPath(Utils.BricksPath);
+        _bricksPrefabs = Utils.GetPrefabsAtPath<GameObject>(Utils.BricksPath);
         _backGroundMaterials = Utils.GetBackGroundMaterialsAtPath(Utils.BackgroundMaterialsPath);
         _selectedPrefabIndex = EditorPrefs.GetInt("_selectedPrefabIndex", -1);
         _selectedBackgroundMaterialIndex = EditorPrefs.GetInt("_selectedBackgroundMaterialIndex", -1);
@@ -75,10 +73,10 @@ public class LevelEditorTool
 
     public void LoadEditor()
     {
-        Debug.Log("Load Level");
         if (_arkanoidManager.levelData != null && !EditorApplication.isPlaying)
-        {
-            Debug.Log(_arkanoidManager.levelData.name);
+        {            
+            Debug.Log(_arkanoidManager.levelData.levelName);
+            _arkanoidManager.Bricks.ClearChildrens();
             LevelBricks = new GameObject[LevelData.LevelWidth * LevelData.LevelHeight];
 
             foreach (BrickPosition brickPosition in _arkanoidManager.levelData.levelBricks)
@@ -167,10 +165,6 @@ public class LevelEditorTool
         GameObject brick = null;
 
         Vector2Int gridPosition = _grid.MousePositionToGridPosition(position);
-        Debug.Log(position);
-        Debug.Log(gridPosition);
-        Debug.Log(gridPosition.x + gridPosition.y * LevelData.LevelWidth);
-
         if (LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth] != null)
         {
             brick = LevelBricks[gridPosition.x + gridPosition.y * LevelData.LevelWidth];
@@ -191,7 +185,7 @@ public class LevelEditorTool
 
     private void GetSelectedPrefab(int index)
     {
-        if (_selectedPrefab == null || _currentPrefabIndex != index)
+        if (index != -1 && (_selectedPrefab == null || _currentPrefabIndex != index))
         {
             _currentPrefabIndex = index;
             GameObject.DestroyImmediate(_selectedPrefab);

@@ -2,9 +2,15 @@
 {
     public class PowerUpSuperBall : PowerUp
     {
-        protected override void ApplyPowerUp()
+        public override void ApplyPowerUp()
         {
             Ball.superBall = true;
+        }
+
+        public override void UnApplyPowerUp()
+        {
+            base.UnApplyPowerUp();
+            Ball.superBall = false;
         }
     }
 }

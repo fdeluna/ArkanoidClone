@@ -47,6 +47,8 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -58,6 +60,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -70,12 +73,13 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 4c1c729960d091e42918779801ffbc94, type: 3}
+  m_Sprite: {fileID: 8695840265173486372, guid: 4c1c729960d091e42918779801ffbc94,
+    type: 3}
   m_Color: {r: 0.90588236, g: 0.29803923, b: 0.23529412, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.56, y: 2.56}
+  m_Size: {x: 1.92, y: 1.92}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -98,8 +102,8 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2.56, y: 2.56}
-    newSize: {x: 2.56, y: 2.56}
+    oldSize: {x: 1.92, y: 1.92}
+    newSize: {x: 1.92, y: 1.92}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
@@ -119,5 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ed4c2ecae1691c41bd67e4b156b17c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bricktype: 0
+  brickType: 0
   hitsToDestroy: 1
+  BrickParticles: {fileID: 7150741948143373584, guid: f2c392295b8ef2e4db0a514fa8b5046d,
+    type: 3}

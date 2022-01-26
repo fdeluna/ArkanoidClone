@@ -2,9 +2,15 @@
 {
     public class PowerUpMagnet : PowerUp
     {
-        protected override void ApplyPowerUp()
+        public override void ApplyPowerUp()
         {
             Ball.magnet = true;
+        }
+
+        public override void UnApplyPowerUp()
+        {
+            base.UnApplyPowerUp();
+            Ball.magnet = false;
         }
     }
 }

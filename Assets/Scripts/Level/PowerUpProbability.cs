@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PowerUps;
+using System;
 using UnityEngine;
 
 namespace Level
@@ -6,7 +7,7 @@ namespace Level
     [Serializable]
     public class PowerUpProbability
     {
-        public GameObject powerUp;
+        public PowerUp powerUp;
         [Range(0,1)]
         public float probability = 0;   
     }

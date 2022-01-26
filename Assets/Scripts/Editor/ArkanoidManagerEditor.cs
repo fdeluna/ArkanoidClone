@@ -1,9 +1,14 @@
-﻿using Manager;
+﻿using Level;
+using Manager;
+using PowerUps;
+using System;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
 namespace Editor
 {
+    [ExecuteInEditMode]
     [CustomEditor(typeof(ArkanoidManager))]
     public class ArkanoidManagerEditor : UnityEditor.Editor
     {
@@ -23,10 +28,8 @@ namespace Editor
 
         private void OnEnable()
         {
-            _target = (ArkanoidManager)target;
             InitEditorProperties();
-            _target.Bricks.ClearChildrens();
-            _paintTool = new LevelEditorTool(_target);
+            InitPowerUps();
 
             _edit = EditorPrefs.GetBool("_edit", false);
             if (_edit)
@@ -38,83 +41,100 @@ namespace Editor
         private void OnDisable()
         {
             SceneView.onSceneGUIDelegate -= HandleMouseEvents;
-            EditorPrefs.SetBool("_edit", _edit);        
+            _paintTool.Reset();
+            EditorPrefs.SetBool("_edit", _edit);
         }
 
         private void InitEditorProperties()
         {
+            _target = (ArkanoidManager)target;            
+            _paintTool = new LevelEditorTool(_target);
+
             _levelDataProperty = serializedObject.FindProperty("levelData");
+            serializedObject.ApplyModifiedProperties();
+
             if (_levelDataProperty.objectReferenceValue == null) return;
-            
+
             _levelDataSerializedObject = new SerializedObject(_levelDataProperty.objectReferenceValue);
             _nextLevelDataProperty = _levelDataSerializedObject.FindProperty("nextLevel");
             _powerUpChance = _levelDataSerializedObject.FindProperty("powerUpChance");
-            _powerUpsList = _levelDataSerializedObject.FindProperty("powerUpsProbability");            
-            serializedObject.ApplyModifiedProperties();
         }
 
         public override void OnInspectorGUI()
         {
+            base.OnInspectorGUI();
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_levelDataProperty);
             if (EditorGUI.EndChangeCheck())
             {
-                _edit = false;
-                _target.Bricks.ClearChildrens();
+                _edit = false;                
                 InitEditorProperties();
-                _paintTool.LoadEditor();            
+                _paintTool.LoadEditor();
             }
 
             if (_levelDataProperty.objectReferenceValue == null) return;
+
             EditorGUILayout.PropertyField(_nextLevelDataProperty);
 
-            if (_edit)
+            if (Application.isPlaying && _edit)
             {
-                PowerUpsEditor();
-                if (GUILayout.Button("Clear"))
-                {
-                    _target.Bricks.ClearChildrens();
-                }
-
-                if (!GUILayout.Button("Save")) return;
-                    
                 _edit = false;
-                EditorPrefs.DeleteKey("edit");
-                Tools.current = Tool.View;
-                SceneView.onSceneGUIDelegate -= HandleMouseEvents;
                 _paintTool.Reset();
-                _target.levelData.Save(_paintTool.LevelBricks);
-                EditorUtility.SetDirty(_target);
-                EditorUtility.SetDirty(_target.levelData);
-                serializedObject.ApplyModifiedProperties();
+                SceneView.onSceneGUIDelegate -= HandleMouseEvents;
+                SceneView.RepaintAll();
             }
             else
             {
-                if (!GUILayout.Button("Edit")) return;
-                    
-                _edit = true;
-                Tools.current = Tool.None;
-                SceneView.onSceneGUIDelegate += HandleMouseEvents;
-                _paintTool.Reset();
-                SceneView.RepaintAll();
+                if (_edit)
+                {
+                    PowerUpsEditor();
+                    if (GUILayout.Button("Clear"))
+                    {
+                        _target.Bricks.ClearChildrens();
+                    }
+
+                    if (!GUILayout.Button("Save")) return;
+
+                    _edit = false;
+                    EditorPrefs.DeleteKey("edit");
+                    Tools.current = Tool.View;
+                    SceneView.onSceneGUIDelegate -= HandleMouseEvents;
+                    _paintTool.Reset();
+                    _target.levelData.Save(_paintTool.LevelBricks);
+                    _levelDataSerializedObject.ApplyModifiedProperties();
+
+                    EditorUtility.SetDirty(_target);
+                    EditorUtility.SetDirty(_target.levelData);
+                    AssetDatabase.SaveAssets();
+                }
+                else
+                {
+                    if (!GUILayout.Button("Edit")) return;
+
+                    _edit = true;
+                    Tools.current = Tool.None;
+                    SceneView.onSceneGUIDelegate += HandleMouseEvents;
+                    _paintTool.Reset();
+                    SceneView.RepaintAll();
+                }
             }
         }
 
         private void OnSceneGUI()
         {
-            if (!_edit) return;
-            
+            if (!_edit || Application.isPlaying) return;
+
             _paintTool.UpdateTool();
             SceneView.RepaintAll();
         }
 
-        void HandleMouseEvents(SceneView sceneView)
+        private void HandleMouseEvents(SceneView sceneView)
         {
             SceneView.currentDrawingSceneView.in2DMode = true;
             var e = Event.current;
 
             if (_target.levelData == null) return;
-            
+
             _paintTool.OnMouseMove(e.mousePosition);
 
             if (e.button == 0 && (e.type == EventType.MouseDown || e.type == EventType.MouseDrag))
@@ -123,12 +143,66 @@ namespace Editor
             }
         }
 
-        void PowerUpsEditor()
+        #region Power Ups
+
+        private void InitPowerUps()
+        {
+            var powerUps = Utils.GetPrefabsAtPath<PowerUp>(Utils.PowerUpsPath);
+            var initProbability = 1f / powerUps.Count;
+
+            foreach (var powerUpPrefab in powerUps)
+            {
+                if (_target.levelData.powerUpsProbability.Count == 0 || !_target.levelData.powerUpsProbability.Any(pp => pp.powerUp == powerUpPrefab))
+                {
+                    _target.levelData.powerUpsProbability.Add(new PowerUpProbability() { powerUp = powerUpPrefab, probability = initProbability });
+                }
+            }
+
+            EditorUtility.SetDirty(_target);
+            EditorUtility.SetDirty(_target.levelData);
+            AssetDatabase.SaveAssets();
+        }
+
+        private void PowerUpsEditor()
         {
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             EditorGUILayout.LabelField("PowerUps", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(_powerUpChance);
-            EditorGUILayout.PropertyField(_powerUpsList, true);
+
+            foreach (var pp in _target.levelData.powerUpsProbability)
+            {
+                EditorGUI.BeginChangeCheck();
+
+                float initProbability = pp.probability;
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(pp.powerUp.type.ToString());
+
+                pp.probability = EditorGUILayout.Slider(pp.probability, 0, 1);
+
+                EditorGUILayout.EndHorizontal();
+
+                if (EditorGUI.EndChangeCheck() && initProbability != pp.probability)
+                {
+                    // proportion to apply
+                    // look info for proportions
+                    float ratio = (1 - pp.probability) / (1 - initProbability);
+                    RedistributeProbabilities(pp, ratio);
+                    break;
+                }
+            }
         }
+
+        private void RedistributeProbabilities(PowerUpProbability powerUpProbability, float ratio)
+        {
+
+            foreach (var pp in _target.levelData.powerUpsProbability)
+            {
+                if (powerUpProbability != pp && pp.probability != 0)
+                {
+                    pp.probability *= ratio;
+                }
+            }
+        }
+        #endregion
     }
 }

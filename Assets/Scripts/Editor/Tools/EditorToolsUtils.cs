@@ -41,8 +41,7 @@ public static class EditorToolsUtils
                 GUIContent guiContent = new GUIContent
                 {
                     text = unityObject.name,
-                    image = AssetPreview.GetAssetPreview(unityObject)
-
+                    image = AssetPreview.GetAssetPreview(unityObject)                    
                 };
                 guiContents.Add(guiContent);
             }

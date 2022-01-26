@@ -1,203 +1,274 @@
-﻿using DG.Tweening;
+﻿using System;
+using DG.Tweening;
 using Level;
 using Manager;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Controller
 {
-    public class BallController : ArkanoidObject
+    public class BallController : MonoBehaviour
     {
         #region movement
-        [Range(4, 8)]
-        [SerializeField] 
-        float speed;
-        [SerializeField] 
-        float deviation = 0.3f;
+
+        [Range(5, 10)]
+        [SerializeField]
+        public float speed;
+        [SerializeField]
+        public float deviation = 0.3f;
+
+        public GameObject BrickCollision;
+        public GameObject PaddleCollision;
+
         #endregion
 
         #region Flags
-        
+
+        [HideInInspector]
         public bool magnet = false;
+        [HideInInspector]
         public bool superBall = false;
-        private bool _move = false;
-        private bool _isLaunched = false;
-        
+        [HideInInspector]
+        public bool explosiveBall = false;
+        [HideInInspector]
+        public bool isLaunched;
+        [HideInInspector]
+        public bool powerUpBall;
+        private bool _move;
+        private Vector3 _initScale;
+
         #endregion
 
         #region Collisions
-        
+
         private Vector3 _direction = new Vector2(0.15f, 1f);
-        private float _contactPointX = 0;
+        private float _contactPointX;
         private PaddleController _paddle;
         private Rigidbody2D _rigidBody;
         private Collider2D _collider2D;
-        private bool _brickHitted = false;
+        private Collider2D _lastCollision;
+        private bool _brickHit;
         private int _layerMask;
-        
+
         #endregion
 
         #region Effects
-        
-        private Tweener _scaleTweener;
+
         private Transform _sprite;
+        private TrailRenderer _trail;
+
         #endregion
 
         #region events
-        public delegate void BallDestroyed();
+
+        private ArkanoidManager _arkanoidManager;
+
+        public delegate void BallDestroyed(float seconds = 0);
+
         public event BallDestroyed OnBallDestroyed;
+
         #endregion
 
-        private void Start()
+
+        private void Awake()
         {
+            _initScale = transform.localScale;
+            _arkanoidManager = FindObjectOfType<ArkanoidManager>();
             _rigidBody = GetComponent<Rigidbody2D>();
             _collider2D = GetComponent<Collider2D>();
             _paddle = FindObjectOfType<PaddleController>();
-            _layerMask = (1 << LayerMask.NameToLayer("Brick")) | (1 << LayerMask.NameToLayer("Walls")) | (1 << LayerMask.NameToLayer("Player"));
+            _trail = GetComponentInChildren<TrailRenderer>();
+            _layerMask = (1 << LayerMask.NameToLayer("Brick")) | (1 << LayerMask.NameToLayer("Walls")) |
+                         (1 << LayerMask.NameToLayer("Player"));
             _sprite = transform.Find("Sprite");
         }
 
         private void OnEnable()
         {
+            _collider2D.enabled = false;
+            OnBallDestroyed -= _arkanoidManager.OnBallDestroyed;
+            OnBallDestroyed += _arkanoidManager.OnBallDestroyed;            
             Reset();
-            OnBallDestroyed -= GameManager.Instance.ArkanoidManager.OnBallDestroyed;
-            OnBallDestroyed += GameManager.Instance.ArkanoidManager.OnBallDestroyed;
-            transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.InOutElastic).SetDelay(1.5f);
-            _move = false;
+            transform.DOScale(_initScale, 0.25f).SetEase(Ease.InOutElastic).SetDelay(0.25f).OnComplete(() =>
+            {
+                powerUpBall = false;
+                _trail.enabled = true;
+                _move = true;
+            });
         }
 
-        private void Update()
+        private void OnDisable()
+        {
+            OnBallDestroyed -= _arkanoidManager.OnBallDestroyed;
+        }
+
+        public void Update()
         {
             if (!_move) return;
-            
-            if (!_isLaunched)
+            if (!isLaunched)
             {
                 var paddlePosition = _paddle.transform.position;
                 var position = !magnet ? new Vector3(paddlePosition.x, paddlePosition.y + 0.5f) : new Vector3(paddlePosition.x - _contactPointX, paddlePosition.y + 0.5f);
                 _rigidBody.position = position;
+
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    _isLaunched = true;
+                    isLaunched = true;
+                    _collider2D.enabled = true;
                 }
-            }
-            else
-            {
-                MoveBall();
             }
         }
 
         private void LateUpdate()
         {
-            _brickHitted = false;
+            _brickHit = false;
         }
 
-        private void MoveBall()
+        private void FixedUpdate()
         {
-            var nextPosition = _rigidBody.position + _direction.ToVector2() * (speed * Time.fixedDeltaTime);
-            var overlapBox = Physics2D.OverlapBox(nextPosition, _collider2D.bounds.size.ToVector2() * 0.5f, 0, _layerMask);
-            
-            if (overlapBox != null)
+            if (isLaunched)
             {
-                _rigidBody.position = _rigidBody.position + (_direction.ToVector2() * overlapBox.Distance(_collider2D).distance);
-                var newDirection = Vector2.Reflect(_direction, overlapBox.Distance(_collider2D).normal).normalized;
-                speed = Mathf.Clamp(speed + 0.1f, 4, 8);
+                _rigidBody.MovePosition(_rigidBody.position +
+                                    _direction.ToVector2().normalized * (speed * Time.fixedDeltaTime));
+            }
+        }
+        
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (_lastCollision != collision.collider)
+            {
+                _lastCollision = collision.collider;
+                //_rigidBody.position += (_direction.ToVector2() * collision.collider.Distance(_collider2D).distance);
 
-                switch (overlapBox.tag)
+                var newDirection = Vector2.Reflect(_direction, collision.GetContact(0).normal).normalized;
+                speed = Mathf.Clamp(speed + 0.1f, 4, 10);
+
+                switch (collision.gameObject.tag)
                 {
                     case "Player":
-                        var hit = Physics2D.Raycast(_rigidBody.position, _direction);
+                        if (_rigidBody.position.y < _paddle.transform.position.y) return;
+
+                        RaycastHit2D hit = Physics2D.Raycast(_rigidBody.position, _direction);
+
                         if (magnet)
                         {
-                            _isLaunched = false;
+                            isLaunched = false;
                             _contactPointX = _paddle.transform.position.x - hit.point.x;
                         }
                         else
                         {
-                            var center = overlapBox.bounds.center;
+                            var center = collision.collider.bounds.center;
                             newDirection.x += center.x > hit.point.x ? -deviation : deviation;
                             _paddle.PaddlePunch();
+                            CollisionEffect(false);
                         }
                         break;
-                    
                     case "Brick":
-                        if (!_brickHitted)
+                        if (!_brickHit)
                         {
-                            _brickHitted = true;
-                            var brick = overlapBox.GetComponent<Brick>();
+                            _brickHit = true;
+                            var brick = collision.gameObject.GetComponent<Brick>();
                             brick.Hit();
+
+                            newDirection = new Vector2
+                            {
+                                x = newDirection.x + (newDirection.x > 0 ? 0.1f : -0.1f),
+                                y = newDirection.y + (newDirection.y > 0 ? 0.1f : -0.1f)
+                            };
+
                             if (superBall)
                             {
-                                _brickHitted = false;
+                                _brickHit = false;
                                 newDirection = _direction;
+                            }
+                            else
+                            {
+                                float radius = explosiveBall ? 1 : 10;
+                                var bricks = Physics2D.OverlapCircleAll(brick.transform.position, radius, 1 << LayerMask.NameToLayer("Brick"));
+
+                                for (int i = 0; i < bricks.Length; i++)
+                                {
+                                    var neighborBrick = bricks[i].GetComponent<Brick>();
+                                    float delay = Vector2.Distance(neighborBrick.transform.position, brick.transform.position) / 10;
+                                    Vector3 direction = (neighborBrick.transform.position - brick.transform.position).normalized;
+
+                                    if (explosiveBall)
+                                    {
+                                        neighborBrick.Hit();
+                                    }
+                                    else
+                                    {
+                                        neighborBrick?.HitAnimation(delay, direction);
+                                    }
+                                }
                             }
                         }
                         break;
+                    case "DeadZone":
+                        if (powerUpBall)
+                        {
+                            Destroy();
+                        }
+                        else
+                        {
+                            OnBallDestroyed.Invoke(5);
+                            speed = Mathf.Clamp(speed / 2f, 5, 10);
+                        }
+                        break;
                 }
-                MoveEffects();
+
+                CollisionEffect();
                 _direction = newDirection;
             }
-            _rigidBody.MovePosition(_rigidBody.position + _direction.ToVector2().normalized * (speed * Time.fixedDeltaTime));
         }
 
-        private void MoveEffects()
+        private void OnCollisionExit2D(Collision2D collision)
+        {
+            _brickHit = false;
+        }
+
+        private void CollisionEffect(bool brick = true)
         {
             var angle = Mathf.Atan2(_direction.x, _direction.y) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-            if (_scaleTweener == null || !_scaleTweener.active)
-            {
-                _scaleTweener = _sprite.DOPunchScale(Vector3.one * 0.25f, 0.15f).SetEase(Ease.InExpo).SetAutoKill();
-            }
+            PoollingPrefabManager.Instance.GetPooledPrefab(brick ? BrickCollision : PaddleCollision, transform.position);
         }
 
-        private void OnTriggerEnter2D(Collider2D collider)
+        public void Destroy()
         {
-            if (!collider.CompareTag("DeadZone")) return;
-            if (OnBallDestroyed == null) return;
-            OnBallDestroyed.Invoke();
-            OnBallDestroyed -= GameManager.Instance.ArkanoidManager.OnBallDestroyed;
+            CollisionEffect();
             gameObject.SetActive(false);
-            Reset();
         }
 
         public void Reset()
         {
             speed = 5;
-            _isLaunched = false;
+            isLaunched = false;
             _direction = new Vector2(0.15f, 1f);
             ResetPowerUps();
             transform.localScale = Vector3.zero;
         }
 
         #region Power Ups
+
         public void ResetPowerUps()
         {
             magnet = false;
             superBall = false;
         }
 
-        public void InstantiateBall(Vector3 postion)
+        public BallController InstantiatePowerUpBall(Vector3 position)
         {
-            BallController ball = PoollingPrefabManager.Instance.GetPooledPrefab(gameObject, postion).GetComponent<BallController>();
-            ball._isLaunched = true;
+            var ball = PoollingPrefabManager.Instance.GetPooledPrefab(gameObject, position)
+                .GetComponent<BallController>();
+            ball.isLaunched = true;
+            ball.powerUpBall = true;
             ball._direction = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+
+            return ball;
         }
 
-        protected override void OnGameStateChanged(GameManager.GameState state)
-        {
-            switch (state)
-            {
-                case GameManager.GameState.Playing:
-                    _move = true;
-                    break;
-                case GameManager.GameState.PlayerDead:
-                    //DOTween.KillAll();
-                    gameObject.SetActive(false);
-                    break;
-                case GameManager.GameState.GameOver:
-                    gameObject.SetActive(false);
-                    break;
-            }
-        }
-        
+
         #endregion
     }
 }

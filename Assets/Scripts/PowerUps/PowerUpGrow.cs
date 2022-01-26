@@ -6,9 +6,15 @@
         protected enum Grow {Increase,Decrease};
         protected Grow GrowType;
 
-        protected override void ApplyPowerUp()
+        public override void ApplyPowerUp()
         {        
             Paddle.ModifyScale(GrowType == Grow.Increase ? Paddle.initScale * increaseMultiply : Paddle.initScale / increaseMultiply);
-        }    
+        }
+
+        public override void UnApplyPowerUp()
+        {
+            base.UnApplyPowerUp();
+            Paddle.ModifyScale(Paddle.initScale);
+        }
     }
 }

@@ -5,9 +5,15 @@ namespace PowerUps
     {    
         public float randomnessStrength = 0.15f;
 
-        protected override void ApplyPowerUp()
+        public override void ApplyPowerUp()
         {
             Paddle.RandomMoves(randomnessStrength);
+        }
+
+        public override void UnApplyPowerUp()
+        {
+            base.UnApplyPowerUp();
+            Paddle.RandomMoves();
         }
     }
 }

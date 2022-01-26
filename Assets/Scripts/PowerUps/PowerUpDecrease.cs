@@ -2,7 +2,7 @@
 {
     public class PowerUpDecrease : PowerUpGrow
     {
-        protected override void ApplyPowerUp()
+        public override void ApplyPowerUp()
         {
             GrowType = Grow.Decrease;
             base.ApplyPowerUp();

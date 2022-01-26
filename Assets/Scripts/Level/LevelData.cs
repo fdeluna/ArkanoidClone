@@ -4,6 +4,7 @@ using DG.Tweening;
 using Manager;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Random = UnityEngine.Random;
 
 namespace Level
@@ -12,11 +13,12 @@ namespace Level
     {
         private enum SpawnAnimation { TopDown, LeftRight, Scale };
 
-        public const int LevelHeight = 14;
-        public const int LevelWidth = 16;
+        public const int LevelHeight = 12;
+        public const int LevelWidth = 12;
         public const float BrickHeight = 0.5f;
-        public const float BrickWidth = 1;
+        public const float BrickWidth = 1f;
 
+        public string levelName;
         public Sprite backgroundSprite;
         public AudioClip backgroundMusic;
         public LevelData nextLevel;
@@ -24,6 +26,7 @@ namespace Level
 
         [Range(0, 1)]
         public float powerUpChance = 0.1f;
+        [HideInInspector]
         public List<PowerUpProbability> powerUpsProbability = new List<PowerUpProbability>();
 
         public void Save(GameObject[] levelBricks)
@@ -47,30 +50,80 @@ namespace Level
 
         public int Load(ArkanoidManager levelManager, System.Action callBack = null)
         {
+            LoadBackground(levelManager);
+            int totalBricks = LoadBricks(levelManager, callBack);
+            return totalBricks;
+        }
+
+
+        private void LoadBackground(ArkanoidManager levelManager)
+        {
+            bool front = Random.value % 2 == 0;
+
+            int currentSortingOrder = levelManager.Background.GetComponent<SortingGroup>().sortingOrder;
+
+
+            GameObject newBackground = Instantiate(levelManager.Background.gameObject, levelManager.Background.position, Quaternion.identity, levelManager.transform);
+            newBackground.name = "Background";
+
+
+            SpriteRenderer newBackgroundSprite = newBackground.GetComponent<SpriteRenderer>();
+            newBackgroundSprite.sprite = backgroundSprite;
+
+            SortingGroup newBackgroundSG = newBackground.GetComponent<SortingGroup>();
+            newBackgroundSG.sortingOrder++;
+
+            Transform mask = newBackgroundSprite.transform.Find("Mask");
+            Vector3 maskScale = front ? Vector3.zero : mask.localScale;
+
+
+            if (front)
+            {
+                newBackgroundSprite.maskInteraction = SpriteMaskInteraction.VisibleOutsideMask;
+            }
+            else
+            {
+                newBackgroundSprite.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+                mask.localScale = Vector3.zero;
+            }
+
+
+            mask.DOScale(maskScale, 3f).SetEase(Ease.InOutSine).OnComplete(() =>
+            {
+                Destroy(levelManager.Background.gameObject);
+                newBackgroundSG.sortingOrder = currentSortingOrder;
+                levelManager.Background = newBackground.transform;
+            });
+        }
+
+        #region LoadBricks
+
+        private int LoadBricks(ArkanoidManager levelManager, Action callBack)
+        {
             var totalBricks = 0;
             var spawnAnimation = (SpawnAnimation)Random.Range(0, 3);
             var sequence = DOTween.Sequence();
             foreach (var brickPosition in levelBricks)
             {
-                var brick = ((GameObject) Instantiate(Resources.Load("Bricks/" + brickPosition.prefabName))).GetComponent<Brick>();
+                var brick = ((GameObject)Instantiate(Resources.Load("Bricks/" + brickPosition.prefabName))).GetComponent<Brick>();
                 brick.transform.parent = levelManager.Bricks;
                 brick.transform.position = brickPosition.position;
                 Tween brickTween = null;
-                
+
                 switch (spawnAnimation)
                 {
                     case SpawnAnimation.TopDown:
-                        brickTween = SpawnTopDown(brick.transform, brickPosition.position);
+                        brickTween = SpawnTopDown(brick, brickPosition.position);
                         break;
                     case SpawnAnimation.LeftRight:
-                        brickTween = SpawnLeftRight(brick.transform, brickPosition.position);
+                        brickTween = SpawnLeftRight(brick, brickPosition.position);
                         break;
                     case SpawnAnimation.Scale:
-                        brickTween = SpawnScale(brick.transform);
+                        brickTween = SpawnScale(brick);
                         break;
                 }
-                
-                sequence.Insert(0,brickTween);
+
+                sequence.Insert(0, brickTween);
                 brick.OnBrickDestroyed += levelManager.OnBrickDestroyed;
                 totalBricks = brick.brickType == Brick.BrickType.Destructible ? totalBricks + 1 : totalBricks;
             }
@@ -78,39 +131,27 @@ namespace Level
             return totalBricks;
         }
 
-
-        private Tween SpawnTopDown(Transform brick, Vector3 endPosition)
+        private Tween SpawnTopDown(Brick brick, Vector3 endPosition)
         {
-            var startPosition = new Vector3(brick.transform.localPosition.x, 1);
-            brick.transform.localPosition = startPosition;
-            return brick.transform.DOMove(endPosition, 2f).SetDelay(Random.Range(0.5f, 1.5f)).SetEase(Ease.OutExpo).OnComplete(() => brick.transform.position = endPosition);
+            var startPosition = Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(0, 1f), new Vector2(1.5f, 2f));
+            return brick.SpawnPosition(startPosition, endPosition, new Vector2(1f, 2f));
         }
 
-        private Tween SpawnLeftRight(Transform brick, Vector3 endPosition)
+        private Tween SpawnLeftRight(Brick brick, Vector3 endPosition)
         {
-            float x = brick.position.x > 0 ? 10 : -10;
-            var startPosition = new Vector3(x, brick.transform.position.y);
-            brick.transform.position = startPosition;
-            return brick.transform.DOMove(endPosition, 1.5f).SetDelay(Random.Range(0.5f, 1.5f)).SetEase(Ease.OutExpo).OnComplete(() => brick.transform.position = endPosition);
+            var startPosition = brick.transform.position.x > LevelWidth / 2 ?
+                    Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(1.5f, 2f), new Vector2(0.5f, 1f)) :
+                    Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(-1f, -1.5f), new Vector2(0.5f, 1f));
+
+            return brick.SpawnPosition(startPosition, endPosition, new Vector2(0.5f, 1.5f));
         }
 
-        private Tween SpawnScale(Transform brick)
+        private Tween SpawnScale(Brick brick)
         {
-            var endScale = brick.localScale;
-            brick.transform.localScale = Vector3.zero;
-            return brick.transform.DOScale(endScale, 1.5f).SetDelay(Random.Range(0.5f, 1.5f)).SetEase(Ease.OutElastic).OnComplete(() => brick.transform.localScale = endScale);
+            return brick.SpawnScale(brick.transform.localScale);
         }
 
-
-        public static void Clean(ArkanoidManager levelManager)
-        {
-            foreach (Transform t in levelManager.Bricks)
-            {
-                var brick = t.GetComponent<Brick>();
-                brick.OnBrickDestroyed -= levelManager.OnBrickDestroyed;
-                Destroy(brick.gameObject);
-            }
-        }
+        #endregion
 
         [MenuItem("Arkanoid/ New Level")]
         public static void CreateLevel()
@@ -118,14 +159,8 @@ namespace Level
             var newLevel = ScriptableObject.CreateInstance<LevelData>();
             // TODO GET LAST ScriptableObject NAME        
             var assetPathAndName = AssetDatabase.GenerateUniqueAssetPath("Assets/Levels/new Level.asset");
+
             AssetDatabase.CreateAsset(newLevel, assetPathAndName);
-            var powerUps = Utils.GetPrefabsAtPath(Utils.PowerUpsPath);
-
-            foreach (var powerUpPrefab in powerUps)
-            {
-                newLevel.powerUpsProbability.Add(new PowerUpProbability() { powerUp = powerUpPrefab });
-            }
-
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
