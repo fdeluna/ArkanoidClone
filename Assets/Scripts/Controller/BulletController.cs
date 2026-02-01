@@ -20,7 +20,7 @@ namespace Controller
             // TODO SPAWN PARTICLES
             Destroy(gameObject);
             var brick = collision.collider.GetComponent<Brick>();
-            if (brick) brick.Hit();
+            if (brick) brick.Hit(true);
         }
     }
 }

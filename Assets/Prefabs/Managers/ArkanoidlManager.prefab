@@ -697,6 +697,8 @@ MonoBehaviour:
   MaxPowerUps: 2
   Countdown: 60
   levelData: {fileID: 11400000, guid: f56d4d2428d095b43b45ab45e25a002a, type: 2}
+  ball: {fileID: 0}
+  loadingLevel: 0
 --- !u!1 &6208395934330900867
 GameObject:
   m_ObjectHideFlags: 0
@@ -768,7 +770,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -5
-  m_Sprite: {fileID: 21300000, guid: 25332420d5e85d54c87934a93e9b38f8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6a9cd09fba317c24894177620fbbd503, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

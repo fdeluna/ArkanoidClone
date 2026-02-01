@@ -11,29 +11,27 @@ namespace Controller
     {
         #region movement
 
-        [Range(5, 10)]
-        [SerializeField]
-        public float speed;
-        [SerializeField]
-        public float deviation = 0.3f;
+        [Range(4, 8f)] [SerializeField] public float speed;
+        [SerializeField] public float deviation = 0.5f;
+
+        public LayerMask layerMask;
 
         public GameObject BrickCollision;
         public GameObject PaddleCollision;
+
+        public Color powerUpBallColor;
+        public Gradient trailPowerUpBallColor;
 
         #endregion
 
         #region Flags
 
-        [HideInInspector]
         public bool magnet = false;
-        [HideInInspector]
         public bool superBall = false;
-        [HideInInspector]
         public bool explosiveBall = false;
-        [HideInInspector]
         public bool isLaunched;
-        [HideInInspector]
         public bool powerUpBall;
+
         private bool _move;
         private Vector3 _initScale;
 
@@ -47,15 +45,19 @@ namespace Controller
         private Rigidbody2D _rigidBody;
         private Collider2D _collider2D;
         private Collider2D _lastCollision;
-        private bool _brickHit;
         private int _layerMask;
 
         #endregion
 
         #region Effects
 
-        private Transform _sprite;
+        private SpriteRenderer _sprite;
         private TrailRenderer _trail;
+
+
+        private Color initBallColor;
+        private Gradient initTrailcolor;
+        private Vector3 _lastFramePosition;
 
         #endregion
 
@@ -66,6 +68,10 @@ namespace Controller
         public delegate void BallDestroyed(float seconds = 0);
 
         public event BallDestroyed OnBallDestroyed;
+        
+        public delegate void PaddleHit(float seconds = 0);
+
+        public event PaddleHit OnPaddleHit;
 
         #endregion
 
@@ -80,26 +86,39 @@ namespace Controller
             _trail = GetComponentInChildren<TrailRenderer>();
             _layerMask = (1 << LayerMask.NameToLayer("Brick")) | (1 << LayerMask.NameToLayer("Walls")) |
                          (1 << LayerMask.NameToLayer("Player"));
-            _sprite = transform.Find("Sprite");
+            _sprite = GetComponentInChildren<SpriteRenderer>();
+
+            initBallColor = _sprite.color;
+            initTrailcolor = _trail.colorGradient;
         }
 
         private void OnEnable()
         {
+            _sprite.color = initBallColor;
+            _trail.colorGradient = initTrailcolor;
             _collider2D.enabled = false;
-            OnBallDestroyed -= _arkanoidManager.OnBallDestroyed;
-            OnBallDestroyed += _arkanoidManager.OnBallDestroyed;            
+            powerUpBall = false;
+            _trail.enabled = false;
+
             Reset();
+
             transform.DOScale(_initScale, 0.25f).SetEase(Ease.InOutElastic).SetDelay(0.25f).OnComplete(() =>
             {
-                powerUpBall = false;
                 _trail.enabled = true;
                 _move = true;
             });
+
+            OnBallDestroyed -= _arkanoidManager.OnBallDestroyed;
+            OnBallDestroyed += _arkanoidManager.OnBallDestroyed;
+
+            OnPaddleHit -= _arkanoidManager.AddTime;
+            OnPaddleHit += _arkanoidManager.AddTime;
         }
 
         private void OnDisable()
         {
             OnBallDestroyed -= _arkanoidManager.OnBallDestroyed;
+            OnPaddleHit -= _arkanoidManager.AddTime;
         }
 
         public void Update()
@@ -108,7 +127,9 @@ namespace Controller
             if (!isLaunched)
             {
                 var paddlePosition = _paddle.transform.position;
-                var position = !magnet ? new Vector3(paddlePosition.x, paddlePosition.y + 0.5f) : new Vector3(paddlePosition.x - _contactPointX, paddlePosition.y + 0.5f);
+                var position = !magnet
+                    ? new Vector3(paddlePosition.x, paddlePosition.y + 0.5f)
+                    : new Vector3(paddlePosition.x - _contactPointX, paddlePosition.y + 0.5f);
                 _rigidBody.position = position;
 
                 if (Input.GetKeyDown(KeyCode.Space))
@@ -119,119 +140,150 @@ namespace Controller
             }
         }
 
-        private void LateUpdate()
-        {
-            _brickHit = false;
-        }
-
         private void FixedUpdate()
         {
             if (isLaunched)
             {
+                Collider2D collider =
+                    Physics2D.OverlapBox(_rigidBody.position, transform.localScale.ToVector2() * 1.1f, 0, layerMask);
+                
+                if (collider != null)
+                {
+                    HandleCollision(collider);
+                }
+
                 _rigidBody.MovePosition(_rigidBody.position +
-                                    _direction.ToVector2().normalized * (speed * Time.fixedDeltaTime));
+                                        _direction.ToVector2().normalized * (speed * Time.fixedDeltaTime));
             }
         }
-        
-        private void OnCollisionEnter2D(Collision2D collision)
+
+        private void LateUpdate()
         {
-            if (_lastCollision != collision.collider)
+            _lastFramePosition = _rigidBody.position;
+        }
+
+        private void HandleCollision(Collider2D collider)
+        {
+            if (_lastCollision != collider)
             {
-                _lastCollision = collision.collider;
-                //_rigidBody.position += (_direction.ToVector2() * collision.collider.Distance(_collider2D).distance);
+                RaycastHit2D hit = Physics2D.BoxCast(_rigidBody.position, transform.localScale.ToVector2() * 1.1f, 0,
+                    _direction, Mathf.Infinity, layerMask);
+                
+                var newDirection = Vector2.Reflect(_direction, hit.normal).normalized;
 
-                var newDirection = Vector2.Reflect(_direction, collision.GetContact(0).normal).normalized;
-                speed = Mathf.Clamp(speed + 0.1f, 4, 10);
+                speed = Mathf.Clamp(speed + 0.2f, 4, 8);
+                
+                AudioManager.Instance.BallCollision();
 
-                switch (collision.gameObject.tag)
+                switch (collider.tag)
                 {
                     case "Player":
-                        if (_rigidBody.position.y < _paddle.transform.position.y) return;
 
-                        RaycastHit2D hit = Physics2D.Raycast(_rigidBody.position, _direction);
+                        if (_direction.y > 0)
+                        {
+                            return;
+                        }
 
                         if (magnet)
                         {
                             isLaunched = false;
                             _contactPointX = _paddle.transform.position.x - hit.point.x;
+                            newDirection = new Vector2(0.1f, 1f);
                         }
                         else
                         {
-                            var center = collision.collider.bounds.center;
+                            var center = collider.bounds.center;
                             newDirection.x += center.x > hit.point.x ? -deviation : deviation;
-                            _paddle.PaddlePunch();
-                            CollisionEffect(false);
                         }
+
+                        OnPaddleHit?.Invoke(1f);
+                        _paddle.PaddlePunch();
+
                         break;
                     case "Brick":
-                        if (!_brickHit)
+                        var brick = collider.gameObject.GetComponent<Brick>();
+                        AudioManager.Instance.BrickCollision();
+                        brick.Hit(powerUpBall || superBall);
+
+                        newDirection = new Vector2
                         {
-                            _brickHit = true;
-                            var brick = collision.gameObject.GetComponent<Brick>();
-                            brick.Hit();
+                            x = newDirection.x + (newDirection.x > 0 ? 0.1f : -0.1f),
+                            y = newDirection.y + (newDirection.y > 0 ? 0.1f : -0.1f)
+                        };
+                        if (superBall)
+                        {
+                            newDirection = _direction;
+                        }
+                        else
+                        {
+                            float radius = explosiveBall ? 1.5f : 10;
+                            var bricks = Physics2D.OverlapCircleAll(brick.transform.position, radius, 1 << LayerMask.NameToLayer("Brick"));
 
-                            newDirection = new Vector2
+                            for (int i = 0; i < bricks.Length; i++)
                             {
-                                x = newDirection.x + (newDirection.x > 0 ? 0.1f : -0.1f),
-                                y = newDirection.y + (newDirection.y > 0 ? 0.1f : -0.1f)
-                            };
+                                var neighborBrick = bricks[i].GetComponent<Brick>();
+                                float delay = Vector2.Distance(neighborBrick.transform.position, brick.transform.position) / 30f;
+                                Vector3 direction = (neighborBrick.transform.position - brick.transform.position)
+                                    .normalized * 0.2f;
 
-                            if (superBall)
-                            {
-                                _brickHit = false;
-                                newDirection = _direction;
-                            }
-                            else
-                            {
-                                float radius = explosiveBall ? 1 : 10;
-                                var bricks = Physics2D.OverlapCircleAll(brick.transform.position, radius, 1 << LayerMask.NameToLayer("Brick"));
-
-                                for (int i = 0; i < bricks.Length; i++)
+                                if (explosiveBall)
                                 {
-                                    var neighborBrick = bricks[i].GetComponent<Brick>();
-                                    float delay = Vector2.Distance(neighborBrick.transform.position, brick.transform.position) / 10;
-                                    Vector3 direction = (neighborBrick.transform.position - brick.transform.position).normalized;
-
-                                    if (explosiveBall)
-                                    {
-                                        neighborBrick.Hit();
-                                    }
-                                    else
-                                    {
-                                        neighborBrick?.HitAnimation(delay, direction);
-                                    }
+                                    neighborBrick.Hit(explosiveBall);
+                                }
+                                else
+                                {
+                                    neighborBrick?.HitAnimation(delay, direction);
                                 }
                             }
                         }
+
                         break;
                     case "DeadZone":
-                        if (powerUpBall)
+
+                        if (!powerUpBall)
                         {
-                            Destroy();
+                            OnBallDestroyed.Invoke(1f);
+                            speed = Mathf.Clamp(speed * 0.5f, 4, 8);
+                            Camera.main.transform.DOShakePosition(0.5f, 0.5f);
                         }
-                        else
-                        {
-                            OnBallDestroyed.Invoke(5);
-                            speed = Mathf.Clamp(speed / 2f, 5, 10);
-                        }
+
+                        // THIS IS A WALL
+                        Transform sprite = collider.transform.Find("Sprite");
+                        sprite.DOPunchPosition(Vector3.right * 2f, 0.3f).SetEase(Ease.InOutExpo)
+                            .OnComplete(() => sprite.localPosition = Vector3.zero);
+
+                        break;
+                    default:
+                        // THIS IS A WALL
+                        sprite = collider.transform.Find("Sprite");
+                        sprite.DOPunchPosition(Vector3.right * 2f, 0.2f).SetEase(Ease.InOutExpo)
+                            .OnComplete(() => sprite.localPosition = Vector3.zero);
                         break;
                 }
 
+                _lastCollision = collider;
                 CollisionEffect();
+                _rigidBody.position = _lastFramePosition;
                 _direction = newDirection;
             }
         }
 
-        private void OnCollisionExit2D(Collision2D collision)
+        private void OnTriggerEnter2D(Collider2D col)
         {
-            _brickHit = false;
+            if (col.CompareTag("SafeZone"))
+            {
+                _direction = new Vector2(0.15f, 1f);
+                var paddlePosition = _paddle.transform.position;
+                _rigidBody.position = new Vector3(paddlePosition.x, paddlePosition.y + 0.5f);
+            }
         }
 
-        private void CollisionEffect(bool brick = true)
+        private void CollisionEffect()
         {
-            var angle = Mathf.Atan2(_direction.x, _direction.y) * Mathf.Rad2Deg;
+            float angle = Mathf.Atan2(_direction.x, _direction.y) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-            PoollingPrefabManager.Instance.GetPooledPrefab(brick ? BrickCollision : PaddleCollision, transform.position);
+            PoollingPrefabManager.Instance.GetPooledPrefab(BrickCollision, transform.position);
+            PoollingPrefabManager.Instance.GetPooledPrefab(PaddleCollision, transform.position);
         }
 
         public void Destroy()
@@ -242,11 +294,11 @@ namespace Controller
 
         public void Reset()
         {
-            speed = 5;
+            speed = 4;
             isLaunched = false;
             _direction = new Vector2(0.15f, 1f);
-            ResetPowerUps();
             transform.localScale = Vector3.zero;
+            ResetPowerUps();
         }
 
         #region Power Ups
@@ -259,15 +311,17 @@ namespace Controller
 
         public BallController InstantiatePowerUpBall(Vector3 position)
         {
-            var ball = PoollingPrefabManager.Instance.GetPooledPrefab(gameObject, position)
+            var ball = PoollingPrefabManager.Instance.GetPooledPrefab(gameObject, transform.position)
                 .GetComponent<BallController>();
             ball.isLaunched = true;
             ball.powerUpBall = true;
-            ball._direction = new Vector3(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-
+            ball.speed = 8;
+            ball._sprite.color = powerUpBallColor;
+            ball._trail.colorGradient = trailPowerUpBallColor;
+            ball.transform.localScale = _initScale;
+            ball._direction = new Vector3(Random.Range(-1f, 1f), 1);
             return ball;
         }
-
 
         #endregion
     }

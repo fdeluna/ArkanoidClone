@@ -1,8 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using DG.Tweening;
 using Manager;
-using PowerUps;
 using UnityEngine;
 
 namespace Controller
@@ -23,6 +21,9 @@ namespace Controller
         private float fireRate = 0.35f;
         [SerializeField]
         private GameObject projectile;
+        [SerializeField]
+        private ParticleSystem[] muzzleParticles;
+
 
         [HideInInspector]
         public Vector3 initScale;
@@ -38,6 +39,7 @@ namespace Controller
         private Tweener _currentTween;
 
         private Transform _gun;
+        private Tween _gunTween;
         private Transform _sprite;
 
         private void Start()
@@ -45,7 +47,7 @@ namespace Controller
             _initPosition = transform.position;
             _currentScale = initScale = transform.localScale;
             transform.localScale = Vector3.zero;
-            _gun = transform.Find("Gun");
+            _gun = transform.Find("Sprite/Gun");
             _sprite = transform.Find("Sprite");
             _rigidBody = GetComponent<Rigidbody2D>();
         }
@@ -90,26 +92,7 @@ namespace Controller
         public void PaddleDead()
         {
             move = false;
-            // TODO DESTROY EFFECT
-            // AFTER EFFECTS
-            /*
-            transform.DOScale(Vector3.zero, 1f).SetEase(Ease.InOutElastic).OnComplete(() =>
-            {
-                // TODO RESTART GAME
-                
-                // TODO GAMEOVER
-                if (lives > 0)
-                {
-                    PaddleSpawn();
-                    GameManager.Instance.CurrentState = GameManager.GameState.Playing;
-                }
-                else
-                {
-                    GameManager.Instance.CurrentState = GameManager.GameState.GameOver;
-                }
-            });
-            */
-            transform.localScale = Vector3.zero;
+            transform.DOScale(Vector3.zero, 1f).SetEase(Ease.InOutElastic);
         }
 
 
@@ -192,13 +175,15 @@ namespace Controller
         public void EnableGun()
         {
             _gun.gameObject.SetActive(true);
-            _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));
+            _gunTween?.Kill();
+            _gunTween = _gun.DOLocalMoveY(1, 0.75f).SetEase(Ease.OutBounce).OnComplete(() => StartCoroutine(FireGun()));
         }
 
         public void DisableGun()
         {
             if (!_fire) return;
-            _gun.DOLocalMoveY(0, 0.75f).SetEase(Ease.OutBounce).SetAutoKill(true).OnComplete(() => _gun.gameObject.SetActive(false));
+            _gunTween?.Kill();
+            _gunTween =_gun.DOLocalMoveY(0, 0.75f).SetEase(Ease.OutBounce).SetAutoKill(true).OnComplete(() => _gun.gameObject.SetActive(false));
             _fire = false;
         }
 
@@ -209,10 +194,18 @@ namespace Controller
             {
                 if (Input.GetKeyDown(KeyCode.Space) && move)
                 {
+                    _gun.DOPunchPosition(Vector3.down * 0.35f, 0.1f).SetEase(Ease.InOutExpo).OnComplete(() => _gun.localPosition = Vector3.up);
+                    
                     foreach (Transform firePoint in _gun)
                     {
                         PoollingPrefabManager.Instance.GetPooledPrefab(projectile, firePoint.position);
                     }
+                    
+                    foreach (ParticleSystem emissionModule in muzzleParticles)
+                    {
+                        emissionModule.Play();
+                    }
+                    
                     yield return new WaitForSeconds(fireRate);
                 }
                 yield return null;

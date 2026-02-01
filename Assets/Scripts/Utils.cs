@@ -9,6 +9,7 @@ using UnityEngine;
         public const string PowerUpsPath = "Assets/Prefabs/Resources/PowerUp";
         public const string BackgroundMaterialsPath = "Assets/Material/Background Materials";
 
+        #if UNITY_EDITOR
         public static List<T> GetPrefabsAtPath<T>(string prefab) where T : Object
         {
             var prefabsGuids = AssetDatabase.FindAssets("t:Prefab", new string[] { prefab });
@@ -22,6 +23,7 @@ using UnityEngine;
 
             return prefabsGuids.Select(prefabGuid => (Sprite)AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(prefabGuid), typeof(Sprite))).ToList();
         }
+        #endif
 
         public static Vector2 GetRandomPointOutisdeCamera(Camera camera, Vector2 viewPortX, Vector2 viewPortY)
         {

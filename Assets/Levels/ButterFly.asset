@@ -229,31 +229,33 @@ MonoBehaviour:
   powerUpsProbability:
   - powerUp: {fileID: -6252005045007591697, guid: 1539bc097c2e01142a2180d0ffbb413e,
       type: 3}
-    probability: 0.017060317
+    probability: 0.0854658
   - powerUp: {fileID: -4864765049212193101, guid: 5cd4fd1c8ec358e458f658e7df6032b4,
       type: 3}
-    probability: 0.02475976
+    probability: 0.0854658
   - powerUp: {fileID: 3533483964169735881, guid: a5139df195d77f640802470141ea2722,
       type: 3}
-    probability: 0.016612865
+    probability: 0.0854658
   - powerUp: {fileID: 7473520194204150155, guid: 56d12f6ffbe42ca43be6dd357260b655,
       type: 3}
-    probability: 0.021284325
+    probability: 0.0854658
   - powerUp: {fileID: 7786738740072851854, guid: 6e59868b84c4746428894bbb50c9cf90,
       type: 3}
-    probability: 0.167
+    probability: 0.0854658
   - powerUp: {fileID: 1829163872897314344, guid: eadb8f24813ce7044949a6ac027b2b26,
       type: 3}
-    probability: 0.19986144
+    probability: 0.0854658
   - powerUp: {fileID: 5881968749958856777, guid: 1c064ac10ed41284e82a78566bb6dbce,
       type: 3}
-    probability: 0.2174595
+    probability: 0.0854658
   - powerUp: {fileID: 1648000357116547583, guid: 501498fccf4c4614fa09439e3cfa5181,
       type: 3}
-    probability: 0.15735736
+    probability: 0.0854658
   - powerUp: {fileID: 4438877641487949648, guid: baf257198c6c7884b95f346247ad8067,
       type: 3}
-    probability: 0.042104688
+    probability: 0.076342
   - powerUp: {fileID: -2276850006322074883, guid: b2a1537cd1af8bc4a94a2a1517b85729,
       type: 3}
-    probability: 0.0917472
+    probability: 0.069
+  - powerUp: {fileID: 0}
+    probability: 0

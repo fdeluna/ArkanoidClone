@@ -1,4 +1,5 @@
 ﻿using Controller;
+using Manager;
 using UnityEngine;
 
 namespace PowerUps
@@ -34,16 +35,7 @@ namespace PowerUps
             _falling = true;
             _collider.enabled = true;
             CurrentTime = applicationTime;
-
-            // Needed here due to there could be more than one ballController for MultiBallPowerUp
-            foreach (var ball in FindObjectsOfType<BallController>())
-            {
-                if (ball.gameObject.activeInHierarchy)
-                {
-                    Ball = ball;
-                    break;
-                }
-            }
+            Ball = ArkanoidManager.Instance.ball;
         }
 
         private void Update()
@@ -53,13 +45,12 @@ namespace PowerUps
                 transform.Translate(Vector3.down * (fallSpeed * Time.deltaTime));
             }
         }
-
-
-
+        
         private void OnCollisionEnter2D(Collision2D collision)
         {
             if (collision.gameObject.CompareTag("Player"))
             {
+                AudioManager.Instance.PickPowerUp();
                 PowerUpManager.Instance.AddPowerUp(this);
                 _collider.enabled = false;
                 _falling = false;
@@ -68,6 +59,7 @@ namespace PowerUps
             {
                 DestroyPowerUp();
             }
+            PoollingPrefabManager.Instance.GetPooledPrefab(particles, transform.position);
         }
 
         public abstract void ApplyPowerUp();

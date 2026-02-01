@@ -11,8 +11,13 @@ using Random = UnityEngine.Random;
 
 namespace Manager
 {
-
-    public enum GameState { MENU, LOADING, PLAYING, GAMEOVER}
+    public enum GameState
+    {
+        MENU,
+        LOADING,
+        PLAYING,
+        GAMEOVER
+    }
 
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
@@ -20,13 +25,9 @@ namespace Manager
     {
         #region Game Configuration
 
-        [Header("Game Configuration")]
-        public int MaxPowerUps = 2;
+        [Header("Game Configuration")] public int MaxPowerUps = 2;
         public float Countdown = 60;
-        [Space]
-
-        [HideInInspector]
-        public LevelData levelData;
+        [Space] [HideInInspector] public LevelData levelData;
         static int _totalBricks;
 
         public Transform Bricks
@@ -37,9 +38,11 @@ namespace Manager
                 {
                     _bricks = transform.Find("Bricks");
                 }
+
                 return _bricks;
             }
         }
+
         private Transform _bricks;
 
         public Transform Background
@@ -50,32 +53,33 @@ namespace Manager
                 {
                     _background = transform.Find("Background");
                 }
+
                 return _background;
             }
-            set
-            {
-                _background = value;
-            }
+            set { _background = value; }
         }
-        private Transform _background;
 
+        private Transform _background;
+        private bool _win = false;
+
+        private GameObject _fireWorks;
         private GameObject _walls;
-        
+
         #endregion
 
         #region References
-        
+
         public int TotalBalls { get; set; } = 1;
-        public bool FreezeTime { get; set; } = false;
+        public BallController ball;
 
         private PaddleController _paddle;
-        private BallController _ball;
         private UIController _ui;
-        private bool _loadingLevel = false;
+        public bool loadingLevel = false;
 
         private string _endGame = "GAME OVER";
         private float _currentTime;
-        
+        private bool _freezeTime = false;
+
         #endregion
 
         #region Sigleton
@@ -100,19 +104,18 @@ namespace Manager
                 return _instance;
             }
         }
+
         private static ArkanoidManager _instance;
 
         #endregion
 
         #region States
-        
+
         private GameState _currentState = GameState.MENU;
+
         public GameState CurrentState
         {
-            get
-            {
-                return _currentState;
-            }
+            get { return _currentState; }
             set
             {
                 _currentState = value;
@@ -135,14 +138,13 @@ namespace Manager
                         _ui.GameScreen.gameObject.SetActive(true);
 
                         StartCoroutine(Loading());
-                        
+
                         break;
                     case GameState.PLAYING:
                         StartCoroutine(Playing());
                         break;
                     case GameState.GAMEOVER:
-                        _ui.LoseScreen.gameObject.SetActive(true);
-                        StartCoroutine(Lose());
+                        StartCoroutine(GameOver());
                         break;
                 }
             }
@@ -152,23 +154,38 @@ namespace Manager
         {
             yield return _ui.StartUp();
             yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
-
-            _ui.StartGame();
             
+            AudioManager.Instance.StartGame();
+            _ui.StartTutorial();
             yield return new WaitForSeconds(1);
+
+            _ui.TutorialRules();
+            yield return new WaitForSeconds(1);
+            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+
+
+            _ui.TutorialPowerUps();
+            yield return new WaitForSeconds(2);
+            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
             
+            AudioManager.Instance.GameBackground();
+            _ui.StartGame();
+
+            yield return new WaitForSeconds(1);
+
             CurrentState = GameState.LOADING;
         }
-        
+
         private IEnumerator Playing()
         {
             while (_currentTime > 0 && CurrentState == GameState.PLAYING)
             {
-                if (!_loadingLevel) 
+                if (!loadingLevel)
                 {
-                    _currentTime -= FreezeTime ? 0 : Time.deltaTime;
+                    _currentTime -= _freezeTime ? 0 : Time.deltaTime;
                     _ui.UpdateTime(_currentTime);
                 }
+
                 yield return null;
             }
 
@@ -177,36 +194,65 @@ namespace Manager
             CurrentState = GameState.GAMEOVER;
         }
 
-
         private IEnumerator Loading()
         {
             yield return StartCoroutine(LoadLevel());
-            _paddle.PaddleSpawn();            
+            _paddle.PaddleSpawn();
 
             CurrentState = GameState.PLAYING;
         }
-        
+
         private IEnumerator LoadLevel()
         {
             _paddle.move = false;
-            _ball?.Destroy();
+            ball?.Destroy();
             yield return new WaitForSeconds(0.25f);
+            AudioManager.Instance.StartLevel();
             CleanLevel();
-            _loadingLevel = true;            
-            PowerUpManager.Instance.Init(levelData);            
-            _totalBricks = levelData.Load(this, () => _loadingLevel = false);
+            loadingLevel = true;
+            PowerUpManager.Instance.Init(levelData);
+            _totalBricks = levelData.Load(this, () => loadingLevel = false);
             _ui.LodalLevelName(levelData.levelName, 1.5f);
-            yield return new WaitUntil(() => !_loadingLevel);
+            yield return new WaitUntil(() => !loadingLevel);
             _ui.RemoveLevelName();
-            _ball = _paddle.BallSpawn();
+            ball = _paddle.BallSpawn();
             _paddle.move = true;
         }
 
-        private IEnumerator Lose()
+        private IEnumerator GameOver()
         {
-            _ball.Destroy();
+            PowerUpManager.Instance.CleanPowerUps();
+            StartCoroutine(_ui.GameOverLost(_endGame));
+            ball.Destroy();
             _paddle.PaddleDead();
-            yield return _ui.GameOverLost(_endGame);
+            
+            if (_win)
+            {
+                _fireWorks.gameObject.SetActive(true);
+                AudioManager.Instance.WinLevel();
+            }
+            else
+            {
+                _fireWorks.gameObject.SetActive(false);
+                AudioManager.Instance.GameOverLevel();
+            }
+
+            foreach (Transform t in Bricks)
+            {
+                var brick = t.GetComponent<Brick>();
+                if (brick.gameObject.activeInHierarchy)
+                {
+                    brick.OnBrickDestroyed -= OnBrickDestroyed;
+                    brick.Hit(true);
+                }
+
+                Destroy(brick.gameObject);
+            }
+
+            _instance = null;
+            yield return new  WaitForSeconds(1);
+            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Space));
+            yield return _ui.GameOver();
             SceneManager.LoadScene(0);
         }
 
@@ -234,9 +280,10 @@ namespace Manager
             else
             {
                 _endGame = "YOU WIN !!!";
-                 CurrentState = GameState.GAMEOVER;
+                _win = true;
+                CurrentState = GameState.GAMEOVER;
             }
-        }        
+        }
 
         #endregion
 
@@ -245,8 +292,9 @@ namespace Manager
         private void Awake()
         {
             _walls = transform.Find("Walls").gameObject;
+            _fireWorks = transform.Find("Fireworks").gameObject;
             _ui = FindObjectOfType<UIController>();
-            _paddle = FindObjectOfType<PaddleController>();            
+            _paddle = FindObjectOfType<PaddleController>();
             CleanLevel();
         }
 
@@ -257,7 +305,7 @@ namespace Manager
 
 #if UNITY_EDITOR
         private void Update()
-        {            
+        {
             if (Application.isEditor && Application.isPlaying)
             {
                 if (Input.GetKeyUp(KeyCode.S))
@@ -279,19 +327,42 @@ namespace Manager
 
         public void OnBrickDestroyed(Brick brick)
         {
-            _totalBricks--;
-            PowerUpManager.Instance.SpawnPowerUp(brick.transform.position);
-            _currentTime += 1;
-            if (_totalBricks > 0) return;
-            
-            LoadNextLevel();
+            if (_currentState == GameState.PLAYING)
+            {
+                _totalBricks--;
+
+                if (brick.addTime)
+                {
+                    AddTime(1.2f);
+                    PowerUpManager.Instance.SpawnPowerUp(brick.transform.position);
+                }
+
+                if (_totalBricks > 0) return;
+                
+                _currentTime += 10f;
+                _ui.AddTime();
+                LoadNextLevel();
+            }
+        }
+
+        public void AddTime(float time)
+        {
+            _currentTime += time;
+            _ui.AddTime();
         }
 
         public void OnBallDestroyed(float seconds)
         {
-            _currentTime -= seconds;
-            //TotalBalls--;
-            if (TotalBalls > 0) return;                        
+            _currentTime = Mathf.Clamp(_currentTime - seconds, 0, Mathf.Infinity);
+            _ui.UpdateTime(_currentTime);
+            _ui.DamageTime();
+            AudioManager.Instance.LoseTime();
+        }
+
+        public void FreezeTime(bool freeze)
+        {
+            _freezeTime = freeze;
+            _ui.FreezeTime(freeze);
         }
 
         #endregion

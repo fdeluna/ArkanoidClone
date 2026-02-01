@@ -47,7 +47,7 @@ namespace Editor
 
         private void InitEditorProperties()
         {
-            _target = (ArkanoidManager)target;            
+            _target = (ArkanoidManager)target;
             _paintTool = new LevelEditorTool(_target);
 
             _levelDataProperty = serializedObject.FindProperty("levelData");
@@ -67,7 +67,7 @@ namespace Editor
             EditorGUILayout.PropertyField(_levelDataProperty);
             if (EditorGUI.EndChangeCheck())
             {
-                _edit = false;                
+                _edit = false;
                 InitEditorProperties();
                 _paintTool.LoadEditor();
             }
@@ -152,9 +152,11 @@ namespace Editor
 
             foreach (var powerUpPrefab in powerUps)
             {
-                if (_target.levelData.powerUpsProbability.Count == 0 || !_target.levelData.powerUpsProbability.Any(pp => pp.powerUp == powerUpPrefab))
+                if (_target.levelData.powerUpsProbability.Count == 0 ||
+                    !_target.levelData.powerUpsProbability.Any(pp => pp.powerUp == powerUpPrefab))
                 {
-                    _target.levelData.powerUpsProbability.Add(new PowerUpProbability() { powerUp = powerUpPrefab, probability = initProbability });
+                    _target.levelData.powerUpsProbability.Add(new PowerUpProbability()
+                        { powerUp = powerUpPrefab, probability = initProbability });
                 }
             }
 
@@ -171,30 +173,32 @@ namespace Editor
 
             foreach (var pp in _target.levelData.powerUpsProbability)
             {
-                EditorGUI.BeginChangeCheck();
-
-                float initProbability = pp.probability;
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField(pp.powerUp.type.ToString());
-
-                pp.probability = EditorGUILayout.Slider(pp.probability, 0, 1);
-
-                EditorGUILayout.EndHorizontal();
-
-                if (EditorGUI.EndChangeCheck() && initProbability != pp.probability)
+                if (pp != null && pp.powerUp != null)
                 {
-                    // proportion to apply
-                    // look info for proportions
-                    float ratio = (1 - pp.probability) / (1 - initProbability);
-                    RedistributeProbabilities(pp, ratio);
-                    break;
+                    EditorGUI.BeginChangeCheck();
+
+                    float initProbability = pp.probability;
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.LabelField(pp.powerUp.type.ToString());
+
+                    pp.probability = EditorGUILayout.Slider(pp.probability, 0, 1);
+
+                    EditorGUILayout.EndHorizontal();
+
+                    if (EditorGUI.EndChangeCheck() && initProbability != pp.probability)
+                    {
+                        // proportion to apply
+                        // look info for proportions
+                        float ratio = (1 - pp.probability) / (1 - initProbability);
+                        RedistributeProbabilities(pp, ratio);
+                        break;
+                    }
                 }
             }
         }
 
         private void RedistributeProbabilities(PowerUpProbability powerUpProbability, float ratio)
         {
-
             foreach (var pp in _target.levelData.powerUpsProbability)
             {
                 if (powerUpProbability != pp && pp.probability != 0)
@@ -203,6 +207,7 @@ namespace Editor
                 }
             }
         }
+
         #endregion
     }
 }

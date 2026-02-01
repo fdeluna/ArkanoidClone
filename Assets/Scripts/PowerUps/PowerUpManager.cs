@@ -10,10 +10,12 @@ namespace PowerUps
     public class PowerUpManager : MonoBehaviour
     {
         public int MaxPowerUps = 4;
+
         private List<PowerUpProbability> _powerUpsDrops;
         private List<PowerUp> _powerUps = new List<PowerUp>();
         private PowerUp _currentPowerUp;
         private float _powerUpChance = 0;
+
         private bool _canSpawn
         {
             get
@@ -51,6 +53,7 @@ namespace PowerUps
                 return _instance;
             }
         }
+
         private static PowerUpManager _instance;
 
         #endregion
@@ -66,17 +69,33 @@ namespace PowerUps
                     _powerUpsDrops.Add(powerUp);
                 }
             }
+
+            if (_currentPowerUp != null)
+            {
+                RemoveCurrentPowerUp();
+            }
         }
 
         public void SpawnPowerUp(Vector3 position)
         {
             if (_canSpawn)
             {
-                //if (ArkanoidManager.Instance.TotalBalls != 1) return;
                 if (!(Random.Range(0, 1f) <= _powerUpChance)) return;
 
-                var powerUp = GetRandomPowerUp();                
-                PoollingPrefabManager.Instance.GetPooledPrefab(powerUp, position);
+                var powerUp = GetRandomPowerUp();
+
+                if (powerUp != null)
+                {
+                    PoollingPrefabManager.Instance.GetPooledPrefab(powerUp, position);
+                }
+            }
+        }
+
+        public void CleanPowerUps()
+        {
+            for (int i = 0; i < _powerUps.Count; i++)
+            {
+                _powerUps[i].UnApplyPowerUp();
             }
         }
 
@@ -84,38 +103,51 @@ namespace PowerUps
         private GameObject GetRandomPowerUp()
         {
             PowerUp powerUp = null;
-            var probability = Random.Range(0, 1f);
+            int randomPowerUp = Random.Range(0, _powerUpsDrops.Count - 1);
+            powerUp = _powerUpsDrops[randomPowerUp].powerUp;
 
-            float totalProbability = 0;
-
-            _powerUpsDrops.Shuffle();
-            
             while (powerUp == null)
             {
-                foreach (var pp in _powerUpsDrops)
-                {
-                    totalProbability += pp.probability;
-                    if (!(probability < totalProbability)) continue;
-
-                    if (_powerUps.Count == 0)
-                    {
-                        powerUp = pp.powerUp;
-                    }
-                    else
-                    {
-                        foreach (var pu in _powerUps)
-                        {
-                            if (pu.GetType() != pp.powerUp.GetType())
-                            {
-                                powerUp = pp.powerUp;
-                                break;
-                            }
-                        }
-                    }
-                }
+                randomPowerUp = Random.Range(0, _powerUpsDrops.Count - 1);
+                powerUp = _powerUpsDrops[randomPowerUp].powerUp;
             }
 
             return powerUp.gameObject;
+
+            // var probability = Random.Range(0, 1f);
+            //
+            // float totalProbability = 0;
+            //
+
+            //
+            // while (powerUp == null)
+            // {
+            //     foreach (var pp in _powerUpsDrops)
+            //     {
+            //         if (pp.powerUp != null)
+            //         {
+            //             totalProbability += pp.probability;
+            //             if (!(probability < totalProbability)) continue;
+            //
+            //             if (_powerUps.Count == 0)
+            //             {
+            //                 powerUp = pp.powerUp;
+            //                 break;
+            //             }
+            //
+            //             foreach (var pu in _powerUps)
+            //             {
+            //                 if (pp.powerUp != null && pu.GetType() != pp.powerUp.GetType())
+            //                 {
+            //                     powerUp = pp.powerUp;
+            //                     break;
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            //
+            // return powerUp.gameObject;
         }
 
 
@@ -136,43 +168,52 @@ namespace PowerUps
 
         private void Update()
         {
-            if (_powerUps.Count > 0)
+            if (ArkanoidManager.Instance.CurrentState == GameState.PLAYING)
             {
-                if (_currentPowerUp != null)
+                if (_powerUps.Count > 0)
                 {
-                    if (!_currentPowerUp.Active)
+                    if (_currentPowerUp != null)
                     {
-                        _currentPowerUp.Active = true;
-                        _currentPowerUp.ApplyPowerUp();
-                    }
-                    else if (_currentPowerUp.CurrentTime > 0)
-                    {
-                        _currentPowerUp.CurrentTime -= Time.deltaTime;
+                        if (!_currentPowerUp.Active)
+                        {
+                            _currentPowerUp.Active = true;
+                            _currentPowerUp.ApplyPowerUp();
+                            AudioManager.Instance.ActivePowerUp();
+                        }
+                        else if (_currentPowerUp.CurrentTime > 0)
+                        {
+                            _currentPowerUp.CurrentTime -= Time.deltaTime;
+                        }
+                        else
+                        {
+                            RemoveCurrentPowerUp();
+                        }
                     }
                     else
                     {
-                        _currentPowerUp.UnApplyPowerUp();                        
-                        _powerUps.Remove(_currentPowerUp);
-                        for(int i = 0; i< _powerUps.Count; i++)
-                        {
-                            UpdateUI(i);
-                        }
-                        _currentPowerUp = null;
+                        _currentPowerUp = _powerUps[0];
+                        _currentPowerUp.gameObject.SetActive(true);
                     }
-                }
-                else
-                {
-                    _currentPowerUp = _powerUps[0];
                 }
             }
         }
 
-        private void UpdateUI(int index)
+        private void RemoveCurrentPowerUp()
         {
-            PowerUp pp = _powerUps[index];            
-            pp.transform.DOMove(transform.GetChild(index).position, 0.5f).SetEase(Ease.OutBounce);
+            _currentPowerUp.UnApplyPowerUp();
+            _powerUps.Remove(_currentPowerUp);
+            for (int i = 0; i < _powerUps.Count; i++)
+            {
+                UpdateUI(i);
+            }
+
+            _currentPowerUp = null;
         }
 
+        private void UpdateUI(int index)
+        {
+            PowerUp pp = _powerUps[index];
+            pp.transform.DOMove(transform.GetChild(index).position, 0.5f).SetEase(Ease.OutBounce);
+        }
     }
 }
-

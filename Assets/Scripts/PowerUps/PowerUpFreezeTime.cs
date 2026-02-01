@@ -6,13 +6,13 @@ namespace PowerUps
     {
         public override void ApplyPowerUp()
         {
-            ArkanoidManager.Instance.FreezeTime = true;
+            ArkanoidManager.Instance.FreezeTime(true);
         }
 
         public override void UnApplyPowerUp()
         {
             base.UnApplyPowerUp();
-            ArkanoidManager.Instance.FreezeTime = false;
+            ArkanoidManager.Instance.FreezeTime(false);
         }
     }
 }

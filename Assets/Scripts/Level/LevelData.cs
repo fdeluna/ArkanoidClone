@@ -11,7 +11,12 @@ namespace Level
 {
     public class LevelData : ScriptableObject
     {
-        private enum SpawnAnimation { TopDown, LeftRight, Scale };
+        private enum SpawnAnimation
+        {
+            TopDown,
+            LeftRight,
+            Scale
+        };
 
         public const int LevelHeight = 12;
         public const int LevelWidth = 12;
@@ -24,9 +29,9 @@ namespace Level
         public LevelData nextLevel;
         public List<BrickPosition> levelBricks = new List<BrickPosition>();
 
-        [Range(0, 1)]
-        public float powerUpChance = 0.1f;
-        [HideInInspector]
+        [Range(0, 1)] public float powerUpChance = 0.1f;
+
+        //[HideInInspector]
         public List<PowerUpProbability> powerUpsProbability = new List<PowerUpProbability>();
 
         public void Save(GameObject[] levelBricks)
@@ -63,7 +68,8 @@ namespace Level
             int currentSortingOrder = levelManager.Background.GetComponent<SortingGroup>().sortingOrder;
 
 
-            GameObject newBackground = Instantiate(levelManager.Background.gameObject, levelManager.Background.position, Quaternion.identity, levelManager.transform);
+            GameObject newBackground = Instantiate(levelManager.Background.gameObject, levelManager.Background.position,
+                Quaternion.identity, levelManager.transform);
             newBackground.name = "Background";
 
 
@@ -105,7 +111,8 @@ namespace Level
             var sequence = DOTween.Sequence();
             foreach (var brickPosition in levelBricks)
             {
-                var brick = ((GameObject)Instantiate(Resources.Load("Bricks/" + brickPosition.prefabName))).GetComponent<Brick>();
+                var brick = ((GameObject)Instantiate(Resources.Load("Bricks/" + brickPosition.prefabName)))
+                    .GetComponent<Brick>();
                 brick.transform.parent = levelManager.Bricks;
                 brick.transform.position = brickPosition.position;
                 Tween brickTween = null;
@@ -127,21 +134,23 @@ namespace Level
                 brick.OnBrickDestroyed += levelManager.OnBrickDestroyed;
                 totalBricks = brick.brickType == Brick.BrickType.Destructible ? totalBricks + 1 : totalBricks;
             }
+
             sequence.OnComplete(() => callBack?.Invoke());
             return totalBricks;
         }
 
         private Tween SpawnTopDown(Brick brick, Vector3 endPosition)
         {
-            var startPosition = Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(0, 1f), new Vector2(1.5f, 2f));
+            var startPosition =
+                Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(0, 1f), new Vector2(1.5f, 2f));
             return brick.SpawnPosition(startPosition, endPosition, new Vector2(1f, 2f));
         }
 
         private Tween SpawnLeftRight(Brick brick, Vector3 endPosition)
         {
-            var startPosition = brick.transform.position.x > LevelWidth / 2 ?
-                    Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(1.5f, 2f), new Vector2(0.5f, 1f)) :
-                    Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(-1f, -1.5f), new Vector2(0.5f, 1f));
+            var startPosition = brick.transform.position.x > LevelWidth / 2
+                ? Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(1.5f, 2f), new Vector2(0.5f, 1f))
+                : Utils.GetRandomPointOutisdeCamera(Camera.main, new Vector2(-1f, -1.5f), new Vector2(0.5f, 1f));
 
             return brick.SpawnPosition(startPosition, endPosition, new Vector2(0.5f, 1.5f));
         }
@@ -153,6 +162,7 @@ namespace Level
 
         #endregion
 
+#if UNITY_EDITOR
         [MenuItem("Arkanoid/ New Level")]
         public static void CreateLevel()
         {
@@ -164,5 +174,6 @@ namespace Level
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
+#endif
     }
 }

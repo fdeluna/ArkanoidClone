@@ -1,5 +1,6 @@
 ﻿using Controller;
 using System.Collections.Generic;
+using Manager;
 
 namespace PowerUps
 {
@@ -12,14 +13,21 @@ namespace PowerUps
         {
             for (var i = 0; i < MaxBalls; i++)
             {
-                _balls.Add(Ball.InstantiatePowerUpBall(Ball.transform.position));
+                _balls.Add(ArkanoidManager.Instance.ball.InstantiatePowerUpBall(ArkanoidManager.Instance.ball.transform
+                    .position));
             }
         }
 
         public override void UnApplyPowerUp()
         {
             base.UnApplyPowerUp();
-            _balls.ForEach(ball => ball.Destroy());            
+            _balls.ForEach(ball =>
+            {
+                if (ball.powerUpBall)
+                {
+                    ball.Destroy();
+                }
+            });
         }
     }
 }
